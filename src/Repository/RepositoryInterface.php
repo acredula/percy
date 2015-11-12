@@ -16,7 +16,7 @@ interface RepositoryInterface
     public function getFromRequest(ServerRequestInterface $request);
 
     /**
-     * Get one or meny resources by field name => values.
+     * Get one or many resources by field name => values.
      *
      * @param string $field
      * @param mixed  $value
