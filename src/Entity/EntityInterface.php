@@ -12,7 +12,7 @@ interface EntityInterface extends ArrayAccess
      *
      * @return array
      */
-    public function getData();
+    public function toArray();
 
     /**
      * Return array mapping of the data for the resource.
@@ -27,11 +27,15 @@ interface EntityInterface extends ArrayAccess
     public function getMapping();
 
     /**
-     * Return array representation of resource data from the point it was hydrated.
+     * Return array of validation rules. See README for rule format.
+     *
+     * [
+     *     'field' => 'rule1|rule_with_variable:variable'
+     * ]
      *
      * @return array
      */
-    public function getOriginalData();
+    public function getValidationRules();
 
     /**
      * Hydrate the entity with data.
