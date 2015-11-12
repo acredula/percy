@@ -33,4 +33,11 @@ interface RepositoryInterface
      * @return \Acredula\DataMapper\Entity\Collection
      */
     public function buildCollection(array $data);
+
+    /**
+     * Get the primary entity type associated with the repository.
+     *
+     * @return string
+     */
+    public function getEntityType();
 }
