@@ -1,6 +1,6 @@
 {
     "name": "acredula/restful-data-mapper",
-    "description": "A fast and intuitive dependency injection container.",
+    "description": "A data mapper aimed at simplifying the Repository and DataMapper layers of a RESTful API",
     "keywords": [
         "acredula",
         "data",
