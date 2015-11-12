@@ -2,6 +2,8 @@
 
 namespace Acredula\DataMapper\Entity\Decorator;
 
+use Acredula\DataMapper\Entity\EntityInterface;
+
 interface DecoratorInterface
 {
     /**
