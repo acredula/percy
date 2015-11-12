@@ -47,7 +47,9 @@ class Collection implements IteratorAggregate, Countable
      */
     public function getIterator()
     {
-        for ($i = 0; $i < count($this); $i++) {
+        $count = count($this);
+
+        for ($i = 0; $i < $count; $i++) {
             yield $this->entities[$i];
         }
     }
