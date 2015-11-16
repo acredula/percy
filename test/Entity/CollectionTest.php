@@ -1,0 +1,41 @@
+<?php
+
+namespace Acredula\DataMapper\Test\Entity;
+
+use Acredula\DataMapper\Entity\Collection;
+
+class CollectionTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * Asserts that a collection can add and iterate entities.
+     */
+    public function testCollectionAddsAndIteratesEntities()
+    {
+        $collection = new Collection;
+        $arrayCollection = [];
+
+        for ($i = 0; $i < 10; $i++) {
+            $data = ['entity' => $i];
+            $arrayCollection[] = $data;
+
+            $entity = $this->getMock('Acredula\DataMapper\Entity\EntityInterface');
+            $entity->expects($this->exactly(2))->method('toArray')->will($this->returnValue($data));
+
+            $collection->addEntity($entity);
+
+            $this->assertCount($i + 1, $collection);
+        }
+
+        $i = 0;
+
+        foreach ($collection->getIterator() as $entity) {
+            $this->assertSame($entity->toArray(), [
+                'entity' => $i
+            ]);
+
+            $i++;
+        }
+
+        $this->assertSame($arrayCollection, $collection->toArray());
+    }
+}
