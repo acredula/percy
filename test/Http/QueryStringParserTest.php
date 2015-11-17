@@ -1,8 +1,8 @@
 <?php
 
-namespace Acredula\DataMapper\Test;
+namespace Percy\Test\Http;
 
-use Acredula\DataMapper\Test\Asset\QueryStringParserTraitStub;
+use Percy\Test\Asset\QueryStringParserTraitStub;
 
 class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 {

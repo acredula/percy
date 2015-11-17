@@ -1,6 +1,6 @@
 <?php
 
-namespace Acredula\DataMapper\Repository;
+namespace Percy\Repository;
 
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -11,7 +11,7 @@ interface RepositoryInterface
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      *
-     * @return \Acredula\DataMapper\Entity\Collection
+     * @return \Percy\Entity\Collection
      */
     public function getFromRequest(ServerRequestInterface $request);
 
@@ -21,7 +21,7 @@ interface RepositoryInterface
      * @param string $field
      * @param mixed  $value
      *
-     * @return \Acredula\DataMapper\Entity\Collection
+     * @return \Percy\Entity\Collection
      */
     public function getByField($field, $value);
 
@@ -30,7 +30,7 @@ interface RepositoryInterface
      *
      * @param array $data
      *
-     * @return \Acredula\DataMapper\Entity\Collection
+     * @return \Percy\Entity\Collection
      */
     public function buildCollection(array $data);
 

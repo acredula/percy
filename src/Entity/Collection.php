@@ -1,6 +1,6 @@
 <?php
 
-namespace Acredula\DataMapper\Entity;
+namespace Percy\Entity;
 
 use Countable;
 use IteratorAggregate;
@@ -8,7 +8,7 @@ use IteratorAggregate;
 class Collection implements IteratorAggregate, Countable
 {
     /**
-     * @var \Acredula\DataMapper\Entity\EntityInterface[]
+     * @var \Percy\Entity\EntityInterface[]
      */
     protected $entities = [];
 
@@ -31,7 +31,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Adds an entity to the collection.
      *
-     * @param \Acredula\DataMapper\Entity\EntityInterface $entity
+     * @param \Percy\Entity\EntityInterface $entity
      *
      * @return self
      */

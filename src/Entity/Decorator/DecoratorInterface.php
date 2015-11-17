@@ -1,15 +1,15 @@
 <?php
 
-namespace Acredula\DataMapper\Entity\Decorator;
+namespace Percy\Entity\Decorator;
 
-use Acredula\DataMapper\Entity\EntityInterface;
+use Percy\Entity\EntityInterface;
 
 interface DecoratorInterface
 {
     /**
      * Decorate an entity.
      *
-     * @param \Acredula\DataMapper\Entity\EntityInterface $entity
+     * @param \Percy\Entity\EntityInterface $entity
      *
      * @return void
      */

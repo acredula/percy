@@ -1,6 +1,6 @@
 <?php
 
-namespace Acredula\DataMapper\Entity;
+namespace Percy\Entity;
 
 trait CollectionBuilderTrait
 {
@@ -9,7 +9,7 @@ trait CollectionBuilderTrait
      *
      * @param array $data
      *
-     * @return \Acredula\DataMapper\Entity\Collection
+     * @return \Percy\Entity\Collection
      */
     public function buildCollection(array $data)
     {

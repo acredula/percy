@@ -10,7 +10,7 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="Acredula DataMapper Test Suite">
+        <testsuite name="Percy Test Suite">
             <directory>test</directory>
         </testsuite>
     </testsuites>

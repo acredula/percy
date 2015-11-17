@@ -1,8 +1,8 @@
 <?php
 
-namespace Acredula\DataMapper\Test\Entity;
+namespace Percy\Test\Entity;
 
-use Acredula\DataMapper\Entity\Collection;
+use Percy\Entity\Collection;
 
 class CollectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,7 +18,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             $data = ['entity' => $i];
             $arrayCollection[] = $data;
 
-            $entity = $this->getMock('Acredula\DataMapper\Entity\EntityInterface');
+            $entity = $this->getMock('Percy\Entity\EntityInterface');
             $entity->expects($this->exactly(2))->method('toArray')->will($this->returnValue($data));
 
             $collection->addEntity($entity);

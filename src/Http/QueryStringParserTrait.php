@@ -1,6 +1,6 @@
 <?php
 
-namespace Acredula\DataMapper\Http;
+namespace Percy\Http;
 
 use InvalidArgumentException;
 

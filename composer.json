@@ -1,14 +1,16 @@
 {
-    "name": "acredula/restful-data-mapper",
-    "description": "A data mapper aimed at simplifying the Repository and DataMapper layers of a RESTful API.",
+    "name": "acredula/percy",
+    "description": "Repository, Storage and DataMapper abstraction to aid in the building of RESTful APIs.",
     "keywords": [
         "acredula",
         "data",
         "mapper",
         "respository",
-        "psr-7"
+        "psr-7",
+        "storage",
+        "entity"
     ],
-    "homepage": "https://github.com/acredula/restful-data-mapper",
+    "homepage": "https://github.com/acredula/percy",
     "license": "MIT",
     "authors": [
         {
@@ -27,12 +29,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Acredula\\DataMapper\\": "src"
+            "Percy\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Acredula\\DataMapper\\Test\\": "test"
+            "Percy\\Test\\": "test"
         }
     },
     "extra": {

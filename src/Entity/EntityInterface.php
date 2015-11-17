@@ -1,8 +1,8 @@
 <?php
 
-namespace Acredula\DataMapper\Entity;
+namespace Percy\Entity;
 
-use Acredula\DataMapper\Entity\Decorator\DecoratorInterface;
+use Percy\Entity\Decorator\DecoratorInterface;
 use ArrayAccess;
 
 interface EntityInterface extends ArrayAccess
@@ -40,8 +40,8 @@ interface EntityInterface extends ArrayAccess
     /**
      * Hydrate the entity with data.
      *
-     * @param array                                                    $data
-     * @param \Acredula\DataMapper\Entity\Decorator\DecoratorInterface $decorators,...
+     * @param array                                      $data
+     * @param \Percy\Entity\Decorator\DecoratorInterface $decorators,...
      *
      * @return void
      */

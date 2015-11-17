@@ -1,6 +1,6 @@
 <?php
 
-namespace Acredula\DataMapper\Dbal;
+namespace Percy\Dbal;
 
 interface DbalInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Acredula\DataMapper\Test\Asset;
+namespace Percy\Test\Asset;
 
-use Acredula\DataMapper\Http\QueryStringParserTrait;
+use Percy\Http\QueryStringParserTrait;
 
 class QueryStringParserTraitStub
 {

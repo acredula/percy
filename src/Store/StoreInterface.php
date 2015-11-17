@@ -1,15 +1,15 @@
 <?php
 
-namespace Acredula\DataMapper\Store;
+namespace Percy\Store;
 
-use Acredula\DataMapper\Entity\Collection;
+use Percy\Entity\Collection;
 
 interface StoreInterface
 {
     /**
      * Logic to achieve what the store needs to do when creating a record in the database
      *
-     * @param  \Acredula\DataMapper\Repository\Entity\Collection $collection
+     * @param  \Percy\Entity\Collection $collection
      * @return boolean
      */
     public function create(Collection $collection);
@@ -17,7 +17,7 @@ interface StoreInterface
     /**
      * Logic to achieve what the store needs to do when reading a record from the database
      *
-     * @param  \Acredula\DataMapper\Repository\Entity\Collection $collection
+     * @param  \Percy\Entity\Collection $collection
      * @return boolean
      */
     public function read(Collection $collection);
@@ -25,7 +25,7 @@ interface StoreInterface
     /**
      * Logic to achieve what the store needs to do when updating a record in the database
      *
-     * @param  \Acredula\DataMapper\Repository\Entity\Collection $collection
+     * @param  \Percy\Entity\Collection $collection
      * @return boolean
      */
     public function update(Collection $collection);
@@ -33,7 +33,7 @@ interface StoreInterface
     /**
      * Logic to achieve what the store needs to do when deleting a record from the database
      *
-     * @param  \Acredula\DataMapper\Repository\Entity\Collection $collection
+     * @param  \Percy\Entity\Collection $collection
      * @return boolean
      */
     public function delete(Collection $collection);
