@@ -30,13 +30,18 @@ class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromRequest(ServerRequestInterface $request)
+    public function getFromRequest(ServerRequestInterface $request, $count = false)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
 
         // @todo figure out best way to pull explicit
         //       fields from the entity mapping
-        $query  = sprintf('SELECT * FROM %s', $this->getTable());
+        $query  = sprintf(
+            'SELECT %s FROM %s',
+            ($count === true) ? 'COUNT(*) as total' : '*',
+            $this->getTable()
+        );
+
         $params = [];
 
         foreach ($rules['filter'] as $key => $where) {
@@ -51,27 +56,43 @@ class AbstractSqlRepository implements RepositoryInterface
             $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
         }
 
+        if ($count === true) {
+            return $this->dbal->execute($query, $params)['total'];
+        }
+
         if (array_key_exists('limit', $rules)) {
             $query .= ' LIMIT ';
             $query .= (array_key_exists('offset', $rules)) ? sprintf('%s,', $rules['offset']) : '';
             $query .= $rules['limit'];
         }
 
-        return $this->buildCollection($this->dbal->execute($query, $params));
+        return $this->buildCollection($this->dbal->execute($query, $params))
+                    ->setTotal($this->getFromRequest($request, true));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getByField($field, $value)
+    public function getByField($field, $value, $count = false)
     {
-        $query  = sprintf('SELECT * FROM %s WHERE %s IN :%s', $this->getTable(), $field, $field);
+        $query  = sprintf(
+            'SELECT %s FROM %s WHERE %s IN :%s',
+            ($count === true) ? 'COUNT(*) as total' : '*',
+            $this->getTable(),
+            $field,
+            $field
+        );
 
         $params = [
             $field => implode(',', (array) $value)
         ];
 
-        return $this->buildCollection($this->dbal->execute($query, $params));
+        if ($count === true) {
+            return $this->dbal->execute($query, $params)['total'];
+        }
+
+        return $this->buildCollection($this->dbal->execute($query, $params))
+                    ->setTotal($this->getByField($field, $value, true));
     }
 
     /**

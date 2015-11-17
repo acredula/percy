@@ -13,6 +13,11 @@ class Collection implements IteratorAggregate, Countable
     protected $entities = [];
 
     /**
+     * @var integer
+     */
+    protected $total = 0;
+
+    /**
      * Return indexed array of array representations of entities.
      *
      * @return array
@@ -60,5 +65,29 @@ class Collection implements IteratorAggregate, Countable
     public function count()
     {
         return count($this->entities);
+    }
+
+    /**
+     * Set the total number of results relating to the collection.
+     *
+     * @param integer $total
+     *
+     * @return self
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    /**
+     * Get the total number of results relating to the collection.
+     *
+     * @return integer
+     */
+    public function getTotal()
+    {
+        return ($total === 0) ? count($this) : $this->total;
     }
 }
