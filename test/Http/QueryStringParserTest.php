@@ -15,7 +15,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('');
 
-        $this->assertSame([], $query);
+        $this->assertEquals([], $query);
     }
 
     /**
@@ -27,7 +27,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('something=something');
 
-        $this->assertSame([], $query);
+        $this->assertEquals(['filter' => []], $query);
     }
 
     /**
@@ -39,7 +39,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('sort=something&filter=field|=|value');
 
-        $this->assertSame([
+        $this->assertEquals([
             'sort'   => 'something',
             'filter' => [
                 [
@@ -60,7 +60,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('sort=something&filter[]=field|=|value&filter[]=field2|<|value2');
 
-        $this->assertSame([
+        $this->assertEquals([
             'sort'   => 'something',
             'filter' => [
                 [

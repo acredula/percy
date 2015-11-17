@@ -10,20 +10,22 @@ interface RepositoryInterface
      * Get resources based on parameters attached to the request object.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param integer                                  $count
      *
      * @return \Percy\Entity\Collection
      */
-    public function getFromRequest(ServerRequestInterface $request);
+    public function getFromRequest(ServerRequestInterface $request, $count = false);
 
     /**
      * Get one or many resources by field name => values.
      *
-     * @param string $field
-     * @param mixed  $value
+     * @param string  $field
+     * @param mixed   $value
+     * @param integer $count
      *
      * @return \Percy\Entity\Collection
      */
-    public function getByField($field, $value);
+    public function getByField($field, $value, $count = false);
 
     /**
      * Build a collection of entities from an indexed array of data.
