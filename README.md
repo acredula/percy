@@ -1,3 +1,3 @@
-# [WIP] RESTful DataMapper
+# [WIP] Percy
 
-A data mapper aimed at simplifying the Repository and DataMapper layers of a RESTful API.
+Repository, Storage and DataMapper abstraction to aid in the building of RESTful APIs.
