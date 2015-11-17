@@ -51,13 +51,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $params[$where['field']] = $where['value'];
         }
 
+        if ($count === true) {
+            return $this->dbal->execute($query, $params)['total'];
+        }
+
         if (array_key_exists('sort', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
             $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
-        }
-
-        if ($count === true) {
-            return $this->dbal->execute($query, $params)['total'];
         }
 
         if (array_key_exists('limit', $rules)) {

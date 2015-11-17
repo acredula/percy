@@ -83,7 +83,7 @@ trait QueryStringParserTrait
             $filter = array_combine(['field', 'delimiter', 'value'], $filter);
 
             $filter['delimiter'] = strtolower($filter['delimiter']);
-            $filter['delimiter'] = mb_html_entity_decode($filter['delimiter']);
+            $filter['delimiter'] = html_entity_decode($filter['delimiter']);
 
             if (! in_array($filter['delimiter'], [
                 '=', '!=', '<>', '<=', '>=', '<', '>', 'in', 'not in'
