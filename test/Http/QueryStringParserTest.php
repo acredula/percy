@@ -2,18 +2,18 @@
 
 namespace Acredula\DataMapper\Test;
 
-use Acredula\DataMapper\Test\Asset\QuerySanitiserTraitStub;
+use Acredula\DataMapper\Test\Asset\QueryStringParserTraitStub;
 
-class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
+class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * Asserts that the sanitiser maps an empty query string.
      */
     public function testSanitiserMapsEmptyQuery()
     {
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('');
+        $query = $sanitiser->parseQueryString('');
 
         $this->assertSame([], $query);
     }
@@ -23,9 +23,9 @@ class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
      */
     public function testSanitiserIgnoresArgumentsNotInWhitelist()
     {
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('something=something');
+        $query = $sanitiser->parseQueryString('something=something');
 
         $this->assertSame([], $query);
     }
@@ -35,9 +35,9 @@ class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
      */
     public function testSanitiserMapsSingleFilter()
     {
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('sort=something&filter=field|=|value');
+        $query = $sanitiser->parseQueryString('sort=something&filter=field|=|value');
 
         $this->assertSame([
             'sort'   => 'something',
@@ -56,9 +56,9 @@ class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
      */
     public function testSanitiserMapsMultipleFilters()
     {
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('sort=something&filter[]=field|=|value&filter[]=field2|<|value2');
+        $query = $sanitiser->parseQueryString('sort=something&filter[]=field|=|value&filter[]=field2|<|value2');
 
         $this->assertSame([
             'sort'   => 'something',
@@ -84,9 +84,9 @@ class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('InvalidArgumentException');
 
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('filter=field|value');
+        $query = $sanitiser->parseQueryString('filter=field|value');
     }
 
     /**
@@ -96,8 +96,8 @@ class QuerySanitiserTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('InvalidArgumentException', '(has) is not an accepted delimiter');
 
-        $sanitiser = new QuerySanitiserTraitStub;
+        $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->sanitiseQuery('filter=field|has|value');
+        $query = $sanitiser->parseQueryString('filter=field|has|value');
     }
 }

@@ -4,17 +4,17 @@ namespace Acredula\DataMapper\Http;
 
 use InvalidArgumentException;
 
-trait QuerySanitiserTrait
+trait QueryStringParserTrait
 {
     /**
-     * Sanitise HTTP query string and return array representation
-     * to be sent as a database query.
+     * Parse HTTP query string and return array representation
+     * to be attached to a database query.
      *
      * @param string $query
      *
      * @return array
      */
-    public function sanitiseQuery($query)
+    public function parseQueryString($query)
     {
         if (empty($query)) {
             return [];
@@ -25,7 +25,7 @@ trait QuerySanitiserTrait
         $query = [];
 
         while (list($key, $value) = each($split)) {
-            if ($mapped = call_user_func_array([$this, 'mapQuery'], [$key, $value])) {
+            if ($mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value])) {
                 $query[$key] = $mapped;
             }
         }
@@ -41,7 +41,7 @@ trait QuerySanitiserTrait
      *
      * @return array|boolean
      */
-    protected function mapQuery($key, $value)
+    protected function filterQueryParams($key, $value)
     {
         switch ($key) {
             case 'limit':
@@ -50,7 +50,7 @@ trait QuerySanitiserTrait
             case 'sort':
                 return $value;
             case 'filter':
-                return $this->mapFilters((array) $value);
+                return $this->parseFilters((array) $value);
             default:
                 return false;
         }
@@ -63,7 +63,7 @@ trait QuerySanitiserTrait
      *
      * @return array
      */
-    protected function mapFilters(array $filters)
+    protected function parseFilters(array $filters)
     {
         $mapped = [];
 
