@@ -62,7 +62,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         if (array_key_exists('limit', $rules)) {
             $query .= ' LIMIT ';
-            $query .= (array_key_exists('offset', $rules)) ? sprintf('%s,', $rules['offset']) : '';
+            $query .= (array_key_exists('offset', $rules)) ? sprintf('%d,', $rules['offset']) : '';
             $query .= $rules['limit'];
         }
 
