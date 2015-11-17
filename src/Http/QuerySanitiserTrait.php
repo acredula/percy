@@ -49,13 +49,10 @@ trait QuerySanitiserTrait
             case 'sort_direction':
             case 'sort':
                 return $value;
-                break;
             case 'filter':
                 return $this->mapFilters((array) $value);
-                break;
             default:
                 return false;
-                break;
         }
 
         return false;
