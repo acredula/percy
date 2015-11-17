@@ -88,6 +88,6 @@ class Collection implements IteratorAggregate, Countable
      */
     public function getTotal()
     {
-        return ($total === 0) ? count($this) : $this->total;
+        return ($this->total === 0) ? count($this) : $this->total;
     }
 }

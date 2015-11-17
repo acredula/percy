@@ -7,7 +7,7 @@ use Percy\Entity\CollectionBuilderTrait;
 use Percy\Http\QueryStringParserTrait;
 use Psr\Http\Message\ServerRequestInterface;
 
-class AbstractSqlRepository implements RepositoryInterface
+abstract class AbstractSqlRepository implements RepositoryInterface
 {
     use CollectionBuilderTrait;
     use QueryStringParserTrait;

@@ -12,7 +12,7 @@ interface RepositoryInterface
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param integer                                  $count
      *
-     * @return \Percy\Entity\Collection
+     * @return \Percy\Entity\Collection|integer
      */
     public function getFromRequest(ServerRequestInterface $request, $count = false);
 
@@ -23,7 +23,7 @@ interface RepositoryInterface
      * @param mixed   $value
      * @param integer $count
      *
-     * @return \Percy\Entity\Collection
+     * @return \Percy\Entity\Collection|integer
      */
     public function getByField($field, $value, $count = false);
 
