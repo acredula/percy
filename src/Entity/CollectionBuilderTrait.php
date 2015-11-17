@@ -16,7 +16,7 @@ trait CollectionBuilderTrait
         $collection = new Collection;
 
         foreach ($data as $row) {
-            $entity = $this->getEntityType();
+            $entity = new $this->getEntityType();
 
             $collection->addEntity(
                 (new $entity)->hydrate($row)

@@ -22,7 +22,9 @@ trait QueryStringParserTrait
 
         parse_str($query, $split);
 
-        $query = [];
+        $query = [
+            'filter' => []
+        ];
 
         while (list($key, $value) = each($split)) {
             if ($mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value])) {
@@ -46,7 +48,9 @@ trait QueryStringParserTrait
         switch ($key) {
             case 'limit':
             case 'offset':
+                return (int) $value;
             case 'sort_direction':
+                return strtolower($value);
             case 'sort':
                 return $value;
             case 'filter':
