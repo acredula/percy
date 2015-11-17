@@ -54,8 +54,6 @@ trait QuerySanitiserTrait
             default:
                 return false;
         }
-
-        return false;
     }
 
     /**
