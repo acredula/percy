@@ -58,7 +58,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         }
 
         return $this->buildCollection($this->dbal->execute($query, $params))
-                    ->setTotal($this->countFromRequest($request);
+                    ->setTotal($this->countFromRequest($request));
     }
 
     /**
