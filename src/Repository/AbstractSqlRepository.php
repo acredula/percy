@@ -30,30 +30,21 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromRequest(ServerRequestInterface $request, $count = false)
+    public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
+        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total ');
 
-        // @todo figure out best way to pull explicit
-        //       fields from the entity mapping
-        $query  = sprintf(
-            'SELECT %s FROM %s',
-            ($count === true) ? 'COUNT(*) as total' : '*',
-            $this->getTable()
-        );
+        return $this->dbal->execute($query, $params)['total'];
+    }
 
-        $params = [];
-
-        foreach ($rules['filter'] as $key => $where) {
-            $keyword = ($key === 0) ? ' WHERE ' : ' AND ';
-            $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
-
-            $params[$where['field']] = $where['value'];
-        }
-
-        if ($count === true) {
-            return $this->dbal->execute($query, $params)['total'];
-        }
+    /**
+     * {@inheritdoc}
+     */
+    public function getFromRequest(ServerRequestInterface $request)
+    {
+        $rules = $this->parseQueryString($request->getUri()->getQuery());
+        list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
@@ -67,32 +58,60 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         }
 
         return $this->buildCollection($this->dbal->execute($query, $params))
-                    ->setTotal($this->getFromRequest($request, true));
+                    ->setTotal($this->countFromRequest($request);
+    }
+
+    /**
+     * Build a base query without sorting and limits from filter rules.
+     *
+     * @param  array  $request
+     * @param  string $start
+     *
+     * @return array
+     */
+    protected function buildQueryFromRules(array $rules, $start = 'SELECT * FROM ')
+    {
+        $query = $start . $this->getTable();
+
+        $params = [];
+
+        foreach ($rules['filter'] as $key => $where) {
+            $keyword = ($key === 0) ? ' WHERE ' : ' AND ';
+            $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
+
+            $params[$where['field']] = $where['value'];
+        }
+
+        return [$query, $params];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getByField($field, $value, $count = false)
+    public function countByField($field, $value)
     {
-        $query  = sprintf(
-            'SELECT %s FROM %s WHERE %s IN :%s',
-            ($count === true) ? 'COUNT(*) as total' : '*',
-            $this->getTable(),
-            $field,
-            $field
-        );
+        $query = sprintf('SELECT COUNT(*) as total FROM %s WHERE %s IN :%s', $this->getTable(), $field, $field);
 
         $params = [
             $field => implode(',', (array) $value)
         ];
 
-        if ($count === true) {
-            return $this->dbal->execute($query, $params)['total'];
-        }
+        return $this->dbal->execute($query, $params)['total'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getByField($field, $value)
+    {
+        $query = sprintf('SELECT * FROM %s WHERE %s IN :%s', $this->getTable(), $field, $field);
+
+        $params = [
+            $field => implode(',', (array) $value)
+        ];
 
         return $this->buildCollection($this->dbal->execute($query, $params))
-                    ->setTotal($this->getByField($field, $value, true));
+                    ->setTotal($this->countByField($field, $value));
     }
 
     /**
