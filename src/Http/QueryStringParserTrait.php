@@ -27,7 +27,8 @@ trait QueryStringParserTrait
         ];
 
         while (list($key, $value) = each($split)) {
-            if ($mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value])) {
+            $mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value]);
+            if ($mapped !== false) {
                 $query[$key] = $mapped;
             }
         }
@@ -50,7 +51,7 @@ trait QueryStringParserTrait
             case 'offset':
                 return (int) $value;
             case 'sort_direction':
-                return strtolower($value);
+                return strtoupper($value);
             case 'sort':
                 return $value;
             case 'filter':

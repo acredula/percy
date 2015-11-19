@@ -33,7 +33,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total ');
+        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
 
         return $this->dbal->execute($query, $params)['total'];
     }
@@ -76,7 +76,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $params = [];
 
         foreach ($rules['filter'] as $key => $where) {
-            $keyword = ($key === 0) ? ' WHERE ' : ' AND ';
+            $keyword = ($key === 0) ? ' WHERE' : ' AND';
             $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
 
             $params[$where['field']] = $where['value'];

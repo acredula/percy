@@ -40,10 +40,9 @@ interface EntityInterface extends ArrayAccess
     /**
      * Hydrate the entity with data.
      *
-     * @param array                                      $data
-     * @param \Percy\Entity\Decorator\DecoratorInterface $decorators,...
+     * @param array $data
      *
-     * @return void
+     * @return array
      */
-    public function hydrate(array $data, DecoratorInterface ...$decorators);
+    public function hydrate(array $data);
 }
