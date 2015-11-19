@@ -90,7 +90,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function countByField($field, $value)
     {
-        $query = sprintf('SELECT COUNT(*) as total FROM %s WHERE %s IN :%s', $this->getTable(), $field, $field);
+        $query = sprintf('SELECT COUNT(*) as total FROM %s WHERE %s IN (:%s)', $this->getTable(), $field, $field);
 
         $params = [
             $field => implode(',', (array) $value)
@@ -104,7 +104,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getByField($field, $value)
     {
-        $query = sprintf('SELECT * FROM %s WHERE %s IN :%s', $this->getTable(), $field, $field);
+        $query = sprintf('SELECT * FROM %s WHERE %s IN (:%s)', $this->getTable(), $field, $field);
 
         $params = [
             $field => implode(',', (array) $value)

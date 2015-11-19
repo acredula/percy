@@ -41,4 +41,30 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(2, $collection);
         $this->assertSame(10, $collection->getTotal());
     }
+
+    public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection() 
+    {
+        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+
+        $dbal->expects($this->at(0))->method('execute')->with(
+            $this->equalTo('SELECT * FROM some_table WHERE field IN (:field)'),
+            $this->equalTo(['field' => 'value1,value2'])
+        )->will(
+            $this->returnValue([[], []])
+        );
+
+        $dbal->expects($this->at(1))->method('execute')->with(
+            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field IN (:field)'),
+            $this->equalTo(['field' => 'value1,value2'])
+        )->will(
+            $this->returnValue(['total' => 10])
+        );
+
+        $collection = (new SqlRepositoryStub($dbal))->getByField('field', ['value1', 'value2']);
+
+        $this->assertInstanceOf('Percy\Entity\Collection', $collection);
+        $this->assertCount(2, $collection);
+        $this->assertSame(10, $collection->getTotal());
+    }
+
 }
