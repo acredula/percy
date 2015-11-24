@@ -27,6 +27,15 @@ interface EntityInterface extends ArrayAccess
     public function getMapping();
 
     /**
+     * Return indexed array of relationship keys. This is simplified to the
+     * point that it can be used however you like to procure the
+     * relevant relationships for the entity.
+     *
+     * @return array
+     */
+    public function getRelationshipKeys();
+
+    /**
      * Return array of validation rules. See README for rule format.
      *
      * [
@@ -42,7 +51,7 @@ interface EntityInterface extends ArrayAccess
      *
      * @param array $data
      *
-     * @return array
+     * @return self
      */
     public function hydrate(array $data);
 }

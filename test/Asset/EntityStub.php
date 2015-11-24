@@ -2,32 +2,18 @@
 
 namespace Percy\Test\Asset;
 
+use Percy\Entity\AbstractEntity;
 use Percy\Entity\EntityInterface;
 
-class EntityStub implements EntityInterface
+class EntityStub extends AbstractEntity implements EntityInterface
 {
-    public function toArray()
-    {
-        return [];
-    }
+    protected $mapping = [
+        'some_field' => [
+            'validation' => 'rules',
+            'type'       => 'string'
+        ],
+        'another_field' => []
+    ];
 
-    public function getMapping()
-    {
-        return [];
-    }
-
-    public function getValidationRules()
-    {
-        return [];
-    }
-
-    public function hydrate(array $array)
-    {
-        return $this;
-    }
-
-    public function offsetSet($key, $value) {}
-    public function offsetGet($key) {}
-    public function offsetExists($key) {}
-    public function offsetUnset($key) {}
+    protected $relationships = ['some_relationship'];
 }
