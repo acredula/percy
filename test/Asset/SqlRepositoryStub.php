@@ -12,6 +12,24 @@ class SqlRepositoryStub extends AbstractSqlRepository
         return EntityStub::class;
     }
 
+    public function getRelationshipMap()
+    {
+        return [
+            'author' => [
+                'defined_in' => [
+                    'table'   => 'article',
+                    'primary' => 'article_uuid',
+                    'entity'  => 'uuid'
+                ],
+                'target' => [
+                    'table'        => 'user',
+                    'relationship' => 'user_uuid',
+                    'primary'      => 'uuid'
+                ]
+            ]
+        ];
+    }
+
     public function getTable()
     {
         return 'some_table';

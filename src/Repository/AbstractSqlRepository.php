@@ -3,9 +3,12 @@
 namespace Percy\Repository;
 
 use Percy\Dbal\DbalInterface;
+use Percy\Entity\Collection;
 use Percy\Entity\CollectionBuilderTrait;
+use Percy\Entity\EntityInterface;
 use Percy\Http\QueryStringParserTrait;
 use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
 
 abstract class AbstractSqlRepository implements RepositoryInterface
 {
@@ -64,8 +67,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Build a base query without sorting and limits from filter rules.
      *
-     * @param  array  $rules
-     * @param  string $start
+     * @param array  $rules
+     * @param string $start
      *
      * @return array
      */
@@ -113,6 +116,68 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         return $this->buildCollection($this->dbal->execute($query, $params))
                     ->setTotal($this->countByField($field, $value));
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attachRelationships(Collection $collection, array $relationships = [])
+    {
+        foreach ($collection->getIterator() as $entity) {
+            // @todo sort filtering of requested relationships
+            array_walk($entity->getRelationshipKeys(), [$this, 'attachEntityRelationships'], $entity);
+        }
+
+        return $collection;
+    }
+
+    /**
+     * Attach relationships to a specific entity.
+     *
+     * @param string                        $entityType
+     * @param string                        $relationship
+     * @param \Percy\Entity\EntityInterface $entity
+     *
+     * @throws \RuntimeException when relationship has not been properly defined
+     *
+     * @return void
+     */
+    protected function attachEntityRelationships($entityType, $relationship, EntityInterface $entity)
+    {
+        if (! array_key_exists($relationship, $this->getRelationshipMap())) {
+            throw new RuntimeException(
+                sprintf('(%s) is not defined in the (%s) relationship map', $relationship, get_class($this))
+            );
+        }
+
+        $map = $this->getRelationshipMap()[$relationship];
+
+        // @todo integrity check on structure of relationship map
+
+        $query = sprintf(
+            'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
+            $map['defined_in']['table'],
+            $map['target']['table'],
+            $map['target']['table'],
+            $map['target']['primary'],
+            $map['defined_in']['table'],
+            $map['target']['relationship'],
+            $map['defined_in']['primary'],
+            $map['defined_in']['entity']
+        );
+
+        $result = $this->dbal->execute($query, [
+            $map['defined_in']['entity'] => $entity[$map['defined_in']['entity']]
+        ]);
+
+        $entity[$relationship] = $this->buildCollection($result, $entityType);
+    }
+
+    /**
+     * Get possible relationships and the properties attached to them.
+     *
+     * @return array
+     */
+    abstract protected function getRelationshipMap();
 
     /**
      * Returns table that repository is reading from.

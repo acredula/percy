@@ -2,6 +2,7 @@
 
 namespace Percy\Repository;
 
+use Percy\Entity\Collection;
 use Psr\Http\Message\ServerRequestInterface;
 
 interface RepositoryInterface
@@ -40,7 +41,7 @@ interface RepositoryInterface
      * @param string $field
      * @param mixed  $value
      *
-     * @return \Percy\Entity\Collection|integer
+     * @return \Percy\Entity\Collection
      */
     public function getByField($field, $value);
 
@@ -52,6 +53,16 @@ interface RepositoryInterface
      * @return \Percy\Entity\Collection
      */
     public function buildCollection(array $data);
+
+    /**
+     * Attach the relationships needed for the collection.
+     *
+     * @param \Percy\Entity\Collection $collection
+     * @param array                    $relationships
+     *
+     * @return \Percy\Entity\Collection
+     */
+    public function attachRelationships(Collection $collection, array $relationships = []);
 
     /**
      * Get the primary entity type associated with the repository.
