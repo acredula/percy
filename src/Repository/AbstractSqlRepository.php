@@ -2,6 +2,7 @@
 
 namespace Percy\Repository;
 
+use InvalidArgumentException;
 use Percy\Dbal\DbalInterface;
 use Percy\Entity\Collection;
 use Percy\Entity\CollectionBuilderTrait;
@@ -19,6 +20,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      * @var \Percy\Dbal\DbalInterface
      */
     protected $dbal;
+
+    /**
+     *
+     * @var mixed
+     */
+    protected $relationships = [];
 
     /**
      * Construct.
@@ -123,7 +130,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function attachRelationships(Collection $collection, array $relationships = [])
     {
         foreach ($collection->getIterator() as $entity) {
-            $rels = $entity->getRelationshipKeys();
+            $rels = $entity->getRelationships();
             // @todo sort filtering of requested relationships
             array_walk($rels, [$this, 'attachEntityRelationships'], $entity);
         }
@@ -150,9 +157,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             );
         }
 
-        $map = $this->getRelationshipMap()[$relationship];
-
-        // @todo integrity check on structure of relationship map
+        $map = $this->getRelationshipMap($relationship);
 
         $query = sprintf(
             'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
@@ -176,9 +181,45 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Get possible relationships and the properties attached to them.
      *
+     * @param string $relationship
+     *
      * @return array
      */
-    abstract protected function getRelationshipMap();
+    protected function getRelationshipMap($relationship)
+    {
+        if (! array_key_exists($relationship, $this->relationships)) {
+            throw new InvalidArgumentException(
+                sprintf('(%s) is not defined in the relationship map on (%s)', $relationship, get_class($this))
+            );
+        }
+
+        $map = $this->relationships[$relationship];
+
+        foreach ([
+            'defined_in' => ['table', 'primary', 'entity'],
+            'target'     => ['table', 'primary', 'relationship']
+        ] as $key => $value) {
+            if (! array_key_exists($key, $map) || ! is_array($map[$key])) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Relationship (%s) should contain the (%s) key and should be of type array on (%s)',
+                        $relationship, $key, get_class($this)
+                    )
+                );
+            }
+
+            if (! empty(array_diff($value, array_keys($map[$key])))) {
+                throw new RuntimeException(
+                    sprintf(
+                        '(%s) for relationship (%s) should contain keys (%s) on (%s)',
+                        $key, $relationship, implode(', ', $value), get_class($this)
+                    )
+                );
+            }
+        }
+
+        return $map;
+    }
 
     /**
      * Returns table that repository is reading from.

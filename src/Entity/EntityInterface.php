@@ -27,13 +27,15 @@ interface EntityInterface extends ArrayAccess
     public function getMapping();
 
     /**
-     * Return indexed array of relationship keys. This is simplified to the
-     * point that it can be used however you like to procure the
-     * relevant relationships for the entity.
+     * Return array of relationships with their entity types.
+     *
+     * [
+     *     'relationship_key' => 'Acme\Entity\SomeEntity'
+     * ]
      *
      * @return array
      */
-    public function getRelationshipKeys();
+    public function getRelationships();
 
     /**
      * Return array of validation rules. See README for rule format.

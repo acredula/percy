@@ -52,26 +52,26 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that the entity returns property with relationship keys. 
+     * Asserts that the entity returns property with relationship.
      */
-    public function testEntityReturnsRelationshipKeys()
+    public function testEntityReturnsRelationships()
     {
-        $rels = (new EntityStub)->getRelationshipKeys();
+        $rels = (new EntityStub)->getRelationships();
 
         $this->assertSame($rels, ['some_relationship']);
     }
 
     /**
-     * Asserts that exception is thrown when relationships property is not defined. 
+     * Asserts that exception is thrown when relationships property is not defined.
      */
     public function testExceptionIsThrownWhenRelationshipsNotDefined()
     {
         $this->setExpectedException('RuntimeException');
-        (new EmptyEntityStub)->getRelationshipKeys();
+        (new EmptyEntityStub)->getRelationships();
     }
 
     /**
-     * Asserts that the entity sets and gets data with type coercion. 
+     * Asserts that the entity sets and gets data with type coercion.
      */
     public function testEntityCanSetAndGetDataWithTypeCoercion()
     {
@@ -97,7 +97,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that an exception is thrown when attempting to set a field that is not mapped. 
+     * Asserts that an exception is thrown when attempting to set a field that is not mapped.
      */
     public function testExceptionIsThrownWhenSettingUnmappedProperty()
     {
