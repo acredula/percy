@@ -151,12 +151,6 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     protected function attachEntityRelationships($entityType, $relationship, EntityInterface $entity)
     {
-        if (! array_key_exists($relationship, $this->getRelationshipMap())) {
-            throw new RuntimeException(
-                sprintf('(%s) is not defined in the (%s) relationship map', $relationship, get_class($this))
-            );
-        }
-
         $map = $this->getRelationshipMap($relationship);
 
         $query = sprintf(
