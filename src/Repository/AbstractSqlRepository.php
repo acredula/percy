@@ -177,6 +177,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @param string $relationship
      *
+     * @throws \InvalidArgumentException when requested relationship is not defined
+     * @throws \RuntimeException when map structure is defined incorrectly
+     *
      * @return array
      */
     protected function getRelationshipMap($relationship)

@@ -21,15 +21,6 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that exception is thrown when mapping not defined for type mapping.
-     */
-    public function testExceptionIsThrownWhenMappingNotDefinedForTypeMapping()
-    {
-        $this->setExpectedException('RuntimeException');
-        (new EmptyEntityStub)->getMapping();
-    }
-
-    /**
      * Asserts that the entity can a provide validation rules.
      */
     public function testEntityCanProvideValidationRules()
@@ -43,15 +34,6 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that exception is thrown when mapping not defined for validation.
-     */
-    public function testExceptionIsThrownWhenMappingNotDefinedForValidation()
-    {
-        $this->setExpectedException('RuntimeException');
-        (new EmptyEntityStub)->getValidationRules();
-    }
-
-    /**
      * Asserts that the entity returns property with relationship.
      */
     public function testEntityReturnsRelationships()
@@ -59,15 +41,6 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $rels = (new EntityStub)->getRelationships();
 
         $this->assertSame($rels, ['some_relationship']);
-    }
-
-    /**
-     * Asserts that exception is thrown when relationships property is not defined.
-     */
-    public function testExceptionIsThrownWhenRelationshipsNotDefined()
-    {
-        $this->setExpectedException('RuntimeException');
-        (new EmptyEntityStub)->getRelationships();
     }
 
     /**

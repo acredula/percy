@@ -13,6 +13,16 @@ abstract class AbstractEntity implements EntityInterface
     protected $data = [];
 
     /**
+     * @var array
+     */
+    protected $mapping = [];
+
+    /**
+     * @var array
+     */
+    protected $relationships = [];
+
+    /**
      * {@inheritdoc}
      */
     public function toArray()
@@ -31,25 +41,17 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function getMapping()
     {
-        if (property_exists($this, 'mapping') && is_array($this->mapping)) {
-            return array_combine(array_keys($this->mapping), array_map(function ($value) {
-                return (array_key_exists('type', $value)) ? $value['type'] : null;
-            }, $this->mapping));
-        }
-
-        throw new RuntimeException(sprintf('(%s) expects a (mapping) property to be defined', get_class($this)));
-    }
+        return array_combine(array_keys($this->mapping), array_map(function ($value) {
+            return (array_key_exists('type', $value)) ? $value['type'] : null;
+        }, $this->mapping));
+}
 
     /**
      * {@inheritdoc}
      */
     public function getRelationships()
     {
-        if (property_exists($this, 'relationships')) {
-            return $this->relationships;
-        }
-
-        throw new RuntimeException(sprintf('(%s) expects a (relationships) property to be defined', get_class($this)));
+        return $this->relationships;
     }
 
     /**
@@ -57,13 +59,9 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function getValidationRules()
     {
-        if (property_exists($this, 'mapping') && is_array($this->mapping)) {
-            return array_combine(array_keys($this->mapping), array_map(function ($value) {
-                return (array_key_exists('validation', $value)) ? $value['validation'] : null;
-            }, $this->mapping));
-        }
-
-        throw new RuntimeException(sprintf('(%s) expects a (mapping) property to be defined', get_class($this)));
+        return array_combine(array_keys($this->mapping), array_map(function ($value) {
+            return (array_key_exists('validation', $value)) ? $value['validation'] : null;
+        }, $this->mapping));
     }
 
     /**
