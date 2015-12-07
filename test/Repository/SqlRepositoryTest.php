@@ -144,5 +144,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $repo->attachRelationships($collection);
 
         $this->assertTrue(isset($entity['some_relationship']));
+        $this->assertInstanceOf('Percy\Entity\Collection', $entity['some_relationship']);
+        $this->assertCount(1, $collection);
     }
 }
