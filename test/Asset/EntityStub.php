@@ -8,6 +8,7 @@ use Percy\Entity\EntityInterface;
 class EntityStub extends AbstractEntity implements EntityInterface
 {
     protected $mapping = [
+        'uuid'       => [],
         'some_field' => [
             'validation' => 'rules',
             'type'       => 'string'
@@ -15,5 +16,5 @@ class EntityStub extends AbstractEntity implements EntityInterface
         'another_field' => []
     ];
 
-    protected $relationships = ['some_relationship'];
+    protected $relationships = ['some_relationship' => 'Percy\Test\Asset\EntityStub'];
 }

@@ -83,7 +83,7 @@ abstract class AbstractEntity implements EntityInterface
     {
         $mapping = $this->getMapping();
 
-        if (! array_key_exists($offset, $mapping) && ! in_array($offset, $this->getRelationships())) {
+        if (! array_key_exists($offset, $mapping) && ! array_key_exists($offset, $this->getRelationships())) {
             throw new InvalidArgumentException(
                 sprintf('(%s) is not an accepted field for (%s)', $offset, get_class($this))
             );

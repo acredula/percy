@@ -2,12 +2,17 @@
 
 namespace Percy\Test\Repository;
 
+use Percy\Entity\Collection;
+use Percy\Test\Asset\EntityStub;
+use Percy\Test\Asset\SqlRepositoryIncompleteMapStub;
+use Percy\Test\Asset\SqlRepositoryNoMapStub;
+use Percy\Test\Asset\SqlRepositoryPartialMapStub;
 use Percy\Test\Asset\SqlRepositoryStub;
 
 class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * Asserts that the repository can build a request, execute it and return a collection.
+     * Asserts that the repository can build a query, execute it and return a collection.
      */
     public function testSqlRepoBuildsQueryFromRequestAndReturnsCollection()
     {
@@ -42,7 +47,10 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(10, $collection->getTotal());
     }
 
-    public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection() 
+    /**
+     * Asserts that the repository can build and execute a query by field.
+     */
+    public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection()
     {
         $dbal = $this->getMock('Percy\Dbal\DbalInterface');
 
@@ -67,4 +75,74 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(10, $collection->getTotal());
     }
 
+    /**
+     * Asserts that an exception is thrown when no relationship mapping is defined.
+     */
+    public function testRepositoryThrowsExceptionWhenNoRelationshipMapping()
+    {
+        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+
+        $this->setExpectedException('InvalidArgumentException', '(some_relationship) is not defined in the relationship map on (Percy\Test\Asset\SqlRepositoryNoMapStub)');
+        $collection = new Collection;
+        $collection->addEntity(new EntityStub);
+
+        $repo = new SqlRepositoryNoMapStub($dbal);
+        $repo->attachRelationships($collection);
+    }
+
+    /**
+     * Asserts that an exception is thrown when relationships are mapped incorrectly.
+     */
+    public function testRepositoryThrowsExceptionWhenRelationshipsMappedIncorrectly()
+    {
+        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+
+        $this->setExpectedException('RuntimeException');
+        $collection = new Collection;
+        $collection->addEntity(new EntityStub);
+
+        $repo = new SqlRepositoryPartialMapStub($dbal);
+        $repo->attachRelationships($collection);
+    }
+
+    /**
+     * Asserts that an exception is thrown when relationships are incomplete.
+     */
+    public function testRepositoryThrowsExceptionWhenRelationshipsIncomplete()
+    {
+        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+
+        $this->setExpectedException('RuntimeException');
+        $collection = new Collection;
+        $collection->addEntity(new EntityStub);
+
+        $repo = new SqlRepositoryIncompleteMapStub($dbal);
+        $repo->attachRelationships($collection);
+    }
+
+    /**
+     * Asserts that the repository attaches relationships to an enity.
+     */
+    public function testRepositoryAttachesRelationships()
+    {
+        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+
+        $dbal->expects($this->once())
+             ->method('execute')
+             ->with(
+                 $this->equalTo('SELECT * FROM some_table LEFT JOIN another_table ON another_table.uuid = some_table.another_uuid WHERE some_uuid = :uuid'),
+                 $this->equalTo(['uuid' => 'a-uuid'])
+             )
+             ->will($this->returnValue([]));
+
+        $entity = (new EntityStub)->hydrate(['uuid' => 'a-uuid']);
+        $collection = new Collection;
+        $collection->addEntity($entity);
+
+        $repo = new SqlRepositoryStub($dbal);
+
+        $repo->attachRelationships($collection);
+
+        $this->assertTrue(isset($entity['some_relationship']));
+    }
 }

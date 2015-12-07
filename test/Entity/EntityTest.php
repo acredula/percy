@@ -15,6 +15,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $mapping = (new EntityStub)->getMapping();
 
         $this->assertSame($mapping, [
+            'uuid'          => null,
             'some_field'    => 'string',
             'another_field' => null
         ]);
@@ -28,6 +29,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $mapping = (new EntityStub)->getValidationRules();
 
         $this->assertSame($mapping, [
+            'uuid'          => null,
             'some_field'    => 'rules',
             'another_field' => null
         ]);
@@ -40,7 +42,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     {
         $rels = (new EntityStub)->getRelationships();
 
-        $this->assertSame($rels, ['some_relationship']);
+        $this->assertSame($rels, ['some_relationship' => 'Percy\Test\Asset\EntityStub']);
     }
 
     /**

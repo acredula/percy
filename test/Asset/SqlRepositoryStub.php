@@ -2,33 +2,22 @@
 
 namespace Percy\Test\Asset;
 
-use Percy\Repository\AbstractSqlRepository;
 use Percy\Test\Asset\EntityStub;
 
-class SqlRepositoryStub extends AbstractSqlRepository
+class SqlRepositoryStub extends BaseSqlRepositoryStub
 {
     protected $relationships = [
-        'author' => [
+        'some_relationship' => [
             'defined_in' => [
-                'table'   => 'article',
-                'primary' => 'article_uuid',
+                'table'   => 'some_table',
+                'primary' => 'some_uuid',
                 'entity'  => 'uuid'
             ],
             'target' => [
-                'table'        => 'user',
-                'relationship' => 'user_uuid',
+                'table'        => 'another_table',
+                'relationship' => 'another_uuid',
                 'primary'      => 'uuid'
             ]
         ]
     ];
-
-    public function getEntityType()
-    {
-        return EntityStub::class;
-    }
-
-    public function getTable()
-    {
-        return 'some_table';
-    }
 }
