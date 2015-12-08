@@ -18,7 +18,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
     {
         $uri     = $this->getMock('Psr\Http\Message\UriInterface');
         $request = $this->getMock('Psr\Http\Message\ServerRequestInterface');
-        $dbal    = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal    = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $uri->expects($this->exactly(2))->method('getQuery')->will($this->returnValue(
             'sort=something&sort_direction=desc&filter[]=field1|=|value1&filter[]=field2|<>|value2&limit=50&offset=0'
@@ -26,14 +26,14 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $request->expects($this->exactly(2))->method('getUri')->will($this->returnValue($uri));
 
-        $dbal->expects($this->at(0))->method('execute')->with(
+        $dbal->expects($this->at(0))->method('fetchAll')->with(
             $this->equalTo('SELECT * FROM some_table WHERE field1 = :field1 AND field2 <> :field2 ORDER BY something DESC LIMIT 0,50'),
             $this->equalTo(['field1' => 'value1', 'field2' => 'value2'])
         )->will(
             $this->returnValue([[], []])
         );
 
-        $dbal->expects($this->at(1))->method('execute')->with(
+        $dbal->expects($this->at(1))->method('fetchOne')->with(
             $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field1 = :field1 AND field2 <> :field2'),
             $this->equalTo(['field1' => 'value1', 'field2' => 'value2'])
         )->will(
@@ -52,16 +52,16 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection()
     {
-        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
-        $dbal->expects($this->at(0))->method('execute')->with(
+        $dbal->expects($this->at(0))->method('fetchAll')->with(
             $this->equalTo('SELECT * FROM some_table WHERE field IN (:field)'),
             $this->equalTo(['field' => 'value1,value2'])
         )->will(
             $this->returnValue([[], []])
         );
 
-        $dbal->expects($this->at(1))->method('execute')->with(
+        $dbal->expects($this->at(1))->method('fetchOne')->with(
             $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field IN (:field)'),
             $this->equalTo(['field' => 'value1,value2'])
         )->will(
@@ -80,7 +80,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testRepositoryThrowsExceptionWhenNoRelationshipMapping()
     {
-        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $this->setExpectedException('InvalidArgumentException', '(some_relationship) is not defined in the relationship map on (Percy\Test\Asset\SqlRepositoryNoMapStub)');
         $collection = new Collection;
@@ -95,7 +95,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testRepositoryThrowsExceptionWhenRelationshipsMappedIncorrectly()
     {
-        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $this->setExpectedException('RuntimeException');
         $collection = new Collection;
@@ -110,7 +110,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testRepositoryThrowsExceptionWhenRelationshipsIncomplete()
     {
-        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $this->setExpectedException('RuntimeException');
         $collection = new Collection;
@@ -125,10 +125,10 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testRepositoryAttachesRelationships()
     {
-        $dbal = $this->getMock('Percy\Dbal\DbalInterface');
+        $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $dbal->expects($this->once())
-             ->method('execute')
+             ->method('fetchAll')
              ->with(
                  $this->equalTo('SELECT * FROM some_table LEFT JOIN another_table ON another_table.uuid = some_table.another_uuid WHERE some_uuid = :uuid'),
                  $this->equalTo(['uuid' => 'a-uuid'])

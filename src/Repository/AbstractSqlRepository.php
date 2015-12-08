@@ -2,8 +2,8 @@
 
 namespace Percy\Repository;
 
+use Aura\Sql\ExtendedPdoInterface;
 use InvalidArgumentException;
-use Percy\Dbal\DbalInterface;
 use Percy\Entity\Collection;
 use Percy\Entity\CollectionBuilderTrait;
 use Percy\Entity\EntityInterface;
@@ -17,7 +17,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     use QueryStringParserTrait;
 
     /**
-     * @var \Percy\Dbal\DbalInterface
+     * @var \Aura\Sql\ExtendedPdoInterface
      */
     protected $dbal;
 
@@ -30,9 +30,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Construct.
      *
-     * @param \Percy\Dbal\DbalInterface $dbal
+     * @param \Aura\Sql\ExtendedPdoInterface $dbal
      */
-    public function __construct(DbalInterface $dbal)
+    public function __construct(ExtendedPdoInterface $dbal)
     {
         $this->dbal = $dbal;
     }
@@ -45,7 +45,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $rules = $this->parseQueryString($request->getUri()->getQuery());
         list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
 
-        return $this->dbal->execute($query, $params)['total'];
+        return $this->dbal->fetchOne($query, $params)['total'];
     }
 
     /**
@@ -67,7 +67,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $query .= $rules['limit'];
         }
 
-        return $this->buildCollection($this->dbal->execute($query, $params))
+        return $this->buildCollection($this->dbal->fetchAll($query, $params))
                     ->setTotal($this->countFromRequest($request));
     }
 
@@ -106,7 +106,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field => implode(',', (array) $value)
         ];
 
-        return $this->dbal->execute($query, $params)['total'];
+        return $this->dbal->fetchOne($query, $params)['total'];
     }
 
     /**
@@ -120,7 +120,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field => implode(',', (array) $value)
         ];
 
-        return $this->buildCollection($this->dbal->execute($query, $params))
+        return $this->buildCollection($this->dbal->fetchAll($query, $params))
                     ->setTotal($this->countByField($field, $value));
     }
 
@@ -165,7 +165,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $map['defined_in']['entity']
         );
 
-        $result = $this->dbal->execute($query, [
+        $result = $this->dbal->fetchAll($query, [
             $map['defined_in']['entity'] => $entity[$map['defined_in']['entity']]
         ]);
 
