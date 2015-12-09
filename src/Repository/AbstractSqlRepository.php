@@ -172,6 +172,14 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $map['defined_in']['entity'] => $entity[$map['defined_in']['entity']]
         ]);
 
+        $remove = [$map['defined_in']['primary'], $map['target']['relationship']];
+
+        foreach ($result as &$resource) {
+            $resource = array_filter($resource, function ($key) use ($remove) {
+                return (! in_array($key, $remove));
+            }, ARRAY_FILTER_USE_KEY);
+        }
+
         $entity[$relationship] = $this->buildCollection($result, $entityType);
     }
 
