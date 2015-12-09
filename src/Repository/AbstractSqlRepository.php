@@ -45,7 +45,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $rules = $this->parseQueryString($request->getUri()->getQuery());
         list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
 
-        return $this->dbal->fetchOne($query, $params)['total'];
+        return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
 
     /**
@@ -109,7 +109,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field => implode(',', (array) $value)
         ];
 
-        return $this->dbal->fetchOne($query, $params)['total'];
+        return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
 
     /**
