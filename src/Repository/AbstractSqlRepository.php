@@ -53,7 +53,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getFromRequest(ServerRequestInterface $request)
     {
-        $rules = $this->parseQueryString($request->getUri()->getQuery());
+        $rules = array_merge([
+            'filter' => ''
+        ], $this->parseQueryString($request->getUri()->getQuery()));
+
         list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules)) {
