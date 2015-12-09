@@ -53,9 +53,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getFromRequest(ServerRequestInterface $request)
     {
-        $rules = array_merge([
-            'filter' => ''
-        ], $this->parseQueryString($request->getUri()->getQuery()));
+        $rules = $this->parseQueryString($request->getUri()->getQuery());
 
         list($query, $params) = $this->buildQueryFromRules($rules);
 
@@ -88,11 +86,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         $params = [];
 
-        foreach ($rules['filter'] as $key => $where) {
-            $keyword = ($key === 0) ? ' WHERE' : ' AND';
-            $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
+        if (array_key_exists('filter', $rules)) {
+            foreach ($rules['filter'] as $key => $where) {
+                $keyword = ($key === 0) ? ' WHERE' : ' AND';
+                $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
 
-            $params[$where['field']] = $where['value'];
+                $params[$where['field']] = $where['value'];
+            }
         }
 
         return [$query, $params];
