@@ -38,6 +38,15 @@ interface EntityInterface extends ArrayAccess
     public function getRelationships();
 
     /**
+     * Return the decorators for a specific action.
+     *
+     * @param integer $action
+     *
+     * @return array
+     */
+    public function getDecorators($action);
+
+    /**
      * Return array of validation rules. See README for rule format.
      *
      * [

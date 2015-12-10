@@ -4,6 +4,7 @@ namespace Percy\Entity;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Percy\Store\StoreInterface;
 
 abstract class AbstractEntity implements EntityInterface
 {
@@ -21,6 +22,11 @@ abstract class AbstractEntity implements EntityInterface
      * @var array
      */
     protected $relationships = [];
+
+    /**
+     * @var array
+     */
+    protected $decorators = [];
 
     /**
      * {@inheritdoc}
@@ -52,6 +58,21 @@ abstract class AbstractEntity implements EntityInterface
     public function getRelationships()
     {
         return $this->relationships;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDecorators($action = null)
+    {
+        $decorators = array_merge([
+            StoreInterface::ON_CREATE => [],
+            StoreInterface::ON_READ   => [],
+            StoreInterface::ON_UPDATE => [],
+            StoreInterface::ON_DELETE => []
+        ], $this->decorators);
+
+        return (is_null($action)) ? $decorators : $decorators[$type];
     }
 
     /**
