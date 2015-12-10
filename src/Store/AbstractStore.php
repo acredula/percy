@@ -20,7 +20,8 @@ abstract class AbstractStore implements StoreInterface
     protected function decorate(Collection $collection, $action)
     {
         foreach ($collection->getIterator() as $entity) {
-            array_walk($entity->getDecorators($type), [$this, 'invokeDecorators'], [$entity]);
+            $decorators = $entity->getDecorators($action);
+            array_walk($decorators, [$this, 'invokeDecorators'], [$entity]);
         }
     }
 

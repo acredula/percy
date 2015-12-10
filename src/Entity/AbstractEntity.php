@@ -72,7 +72,7 @@ abstract class AbstractEntity implements EntityInterface
             StoreInterface::ON_DELETE => []
         ], $this->decorators);
 
-        return (is_null($action)) ? $decorators : $decorators[$type];
+        return (is_null($action)) ? $decorators : $decorators[$action];
     }
 
     /**
