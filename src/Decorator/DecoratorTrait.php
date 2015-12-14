@@ -20,20 +20,20 @@ trait DecoratorTrait
     {
         foreach ($collection->getIterator() as $entity) {
             $decorators = $entity->getDecorators($action);
-            array_walk($decorators, [$this, 'invokeDecorators'], [$entity]);
+            array_walk($decorators, [$this, 'invokeDecorators'], $entity);
         }
     }
 
     /**
      * Invoke callable decorator on entity.
      *
-     * @param string                        $decorator
      * @param array                         $properties
+     * @param string                        $decorator
      * @param \Percy\Entity\EntityInterface $entity
      *
      * @return void
      */
-    protected function invokeDecorators($decorator, array $properties, EntityInterface $entity)
+    protected function invokeDecorators(array $properties, $decorator, EntityInterface $entity)
     {
         $decorator = new $decorator;
 

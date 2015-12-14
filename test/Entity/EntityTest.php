@@ -26,13 +26,9 @@ class EntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testEntityCanProvideValidationRules()
     {
-        $mapping = (new EntityStub)->getValidationRules();
+        $validator = (new EntityStub)->getValidator();
 
-        $this->assertSame($mapping, [
-            'uuid'          => null,
-            'some_field'    => 'rules',
-            'another_field' => null
-        ]);
+        $this->assertSame($validator, 'Acme\Validator\EntityValidator');
     }
 
     /**
@@ -93,6 +89,9 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $something = $entity['something'];
     }
 
+    /**
+     * Asserts that a collection is arrayified.
+     */
     public function testEntityProxiesOutToCollectionWhenItFindsOne()
     {
         $collection = $this->getMock('Percy\Entity\Collection');
@@ -103,5 +102,22 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $entity['some_relationship'] = $collection;
 
         $this->assertSame($entity->toArray(), ['some_relationship' => []]);
+    }
+
+    /**
+     * Asserts that an entity can return the correct decorators.
+     */
+    public function testEntityReturnsCorrectDecorators()
+    {
+        $entity = new EntityStub;
+
+        $this->assertSame($entity->getDecorators(), [
+            0 => ['Acme\Decorator' => ['some_field']],
+            1 => [],
+            2 => [],
+            3 => []
+        ]);
+
+        $this->assertSame($entity->getDecorators(0), ['Acme\Decorator' => ['some_field']]);
     }
 }

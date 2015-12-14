@@ -8,11 +8,15 @@ use ArrayAccess;
 interface EntityInterface extends ArrayAccess
 {
     /**
-     * Return array representation of resource data with any updates.
+     * Return array representation of up to date resource data. If passed an
+     * array of scopes, the data will be filtered based on those scopes. If
+     * null or nothing is passed, data will be unfiltered.
+     *
+     * @param array|null $scopes
      *
      * @return array
      */
-    public function toArray();
+    public function toArray(array $scopes = null);
 
     /**
      * Return array mapping of the data for the resource.
@@ -47,15 +51,11 @@ interface EntityInterface extends ArrayAccess
     public function getDecorators($action = null);
 
     /**
-     * Return array of validation rules. See README for rule format.
+     * Return name of validator class.
      *
-     * [
-     *     'field' => 'rule1|rule_with_variable:variable'
-     * ]
-     *
-     * @return array
+     * @return string
      */
-    public function getValidationRules();
+    public function getValidator();
 
     /**
      * Hydrate the entity with data.

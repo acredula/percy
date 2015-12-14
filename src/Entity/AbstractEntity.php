@@ -29,13 +29,19 @@ abstract class AbstractEntity implements EntityInterface
     protected $decorators = [];
 
     /**
+     * @var string
+     */
+    protected $validator;
+
+    /**
      * {@inheritdoc}
      */
-    public function toArray()
+    public function toArray(array $scopes = null)
     {
+        // @todo filter by scopes
         foreach ($this->data as $key => $value) {
             if ($value instanceof Collection) {
-                $this->data[$key] = $value->toArray();
+                $this->data[$key] = $value->toArray($scopes);
             }
         }
 
@@ -65,7 +71,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function getDecorators($action = null)
     {
-        $decorators = array_merge([
+        $decorators = array_replace([
             StoreInterface::ON_CREATE => [],
             StoreInterface::ON_READ   => [],
             StoreInterface::ON_UPDATE => [],
@@ -78,11 +84,9 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
-    public function getValidationRules()
+    public function getValidator()
     {
-        return array_combine(array_keys($this->mapping), array_map(function ($value) {
-            return (array_key_exists('validation', $value)) ? $value['validation'] : null;
-        }, $this->mapping));
+        return $this->validator;
     }
 
     /**
