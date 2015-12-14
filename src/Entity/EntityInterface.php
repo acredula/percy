@@ -9,14 +9,13 @@ interface EntityInterface extends ArrayAccess
 {
     /**
      * Return array representation of up to date resource data. If passed an
-     * array of scopes, the data will be filtered based on those scopes. If
-     * null or nothing is passed, data will be unfiltered.
+     * array of scopes, the data will be filtered based on those scopes.
      *
-     * @param array|null $scopes
+     * @param array $scopes
      *
      * @return array
      */
-    public function toArray(array $scopes = null);
+    public function toArray(array $scopes = []);
 
     /**
      * Return array mapping of the data for the resource.

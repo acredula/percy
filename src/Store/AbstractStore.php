@@ -13,9 +13,14 @@ abstract class AbstractStore implements StoreInterface
     use DecoratorTrait;
 
     /**
+     * @var \Aura\Filter\FilterFactory
+     */
+    protected $filter;
+
+    /**
      * Construct.
      *
-     * @return void
+     * @param \Aura\Filter\FilterFactory
      */
     public function __construct(FilterFactory $filter)
     {
@@ -34,7 +39,7 @@ abstract class AbstractStore implements StoreInterface
     public function validate(Collection $collection)
     {
         foreach ($collection->getIterator() as $entity) {
-            if (is_null($collection->getValidator())) {
+            if (is_null($entity->getValidator())) {
                 continue;
             }
 

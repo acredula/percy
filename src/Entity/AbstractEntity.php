@@ -36,7 +36,7 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
-    public function toArray(array $scopes = null)
+    public function toArray(array $scopes = [])
     {
         // @todo filter by scopes
         foreach ($this->data as $key => $value) {

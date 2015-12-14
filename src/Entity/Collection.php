@@ -20,14 +20,16 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Return indexed array of array representations of entities.
      *
+     * @param array $scopes
+     *
      * @return array
      */
-    public function toArray()
+    public function toArray(array $scopes = [])
     {
         $collection = [];
 
         foreach ($this->getIterator() as $entity) {
-            $collection[] = $entity->toArray();
+            $collection[] = $entity->toArray($scopes);
         }
 
         return $collection;
