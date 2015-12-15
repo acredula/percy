@@ -50,7 +50,7 @@ class SqlStore extends AbstractStore
     {
         $insert = $this->query->newInsert();
         $insert->into($entity->getDataSource());
-        $insert->cols($entity->toArray(false));
+        $insert->cols($entity->toArray([], false));
 
         $this->dbal->perform($insert->getStatement(), $insert->getBindValues());
     }
@@ -85,7 +85,7 @@ class SqlStore extends AbstractStore
     {
         $update = $this->query->newUpdate();
         $update->table($entity->getDataSource());
-        $update->cols($entity->toArray(false));
+        $update->cols($entity->toArray([], false));
         $update->where(sprintf('%s = ?', $entity->getPrimary()), $entity[$entity->getPrimary()]);
 
         $this->dbal->perform($update->getStatement(), $update->getBindValues());
