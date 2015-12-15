@@ -133,7 +133,7 @@ class SqlStore extends AbstractStore
      */
     protected function collectionIterator(Collection $collection, $callable)
     {
-        $this->dbal->beginEntity();
+        $this->dbal->beginTransaction();
 
         try {
             foreach ($collection->getIterator() as $entity) {
