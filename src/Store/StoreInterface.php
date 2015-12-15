@@ -14,32 +14,40 @@ interface StoreInterface
     /**
      * Logic to achieve what the store needs to do when creating a record in the database.
      *
-     * @param  \Percy\Entity\Collection $collection
+     * @param \Percy\Entity\Collection $collection
+     * @param array                    $scopes
+     *
      * @return boolean
      */
-    public function create(Collection $collection);
+    public function create(Collection $collection, array $scopes = []);
 
     /**
      * Logic to achieve what the store needs to do when reading a record from the database.
      *
-     * @param  \Percy\Entity\Collection $collection
+     * @param \Percy\Entity\Collection $collection
+     * @param array                    $scopes
+     *
      * @return boolean
      */
-    public function read(Collection $collection);
+    public function read(Collection $collection, array $scopes = []);
 
     /**
      * Logic to achieve what the store needs to do when updating a record in the database.
      *
-     * @param  \Percy\Entity\Collection $collection
+     * @param \Percy\Entity\Collection $collection
+     * @param array                    $scopes
+     *
      * @return boolean
      */
-    public function update(Collection $collection);
+    public function update(Collection $collection, array $scopes = []);
 
     /**
      * Logic to achieve what the store needs to do when deleting a record from the database.
      *
-     * @param  \Percy\Entity\Collection $collection
+     * @param \Percy\Entity\Collection $collection
+     * @param array                    $scopes
+     *
      * @return boolean
      */
-    public function delete(Collection $collection);
+    public function delete(Collection $collection, array $scopes = []);
 }

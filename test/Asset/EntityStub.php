@@ -25,4 +25,14 @@ class EntityStub extends AbstractEntity implements EntityInterface
     protected $relationships = ['some_relationship' => 'Percy\Test\Asset\EntityStub'];
 
     protected $validator = 'Acme\Validator\EntityValidator';
+
+    public function getPrimary()
+    {
+        return 'uuid';
+    }
+
+    public function getDataSource()
+    {
+        return 'some_table';
+    }
 }
