@@ -17,6 +17,11 @@ class SqlStore extends AbstractStore
     protected $dbal;
 
     /**
+     * @var \Aura\SqlQuery\QueryFactory
+     */
+    protected $query;
+
+    /**
      * Construct.
      *
      * @param \Aura\Sql\ExtendedPdo      $dbal
@@ -126,7 +131,7 @@ class SqlStore extends AbstractStore
      *
      * @return boolean
      */
-    protected function collectionIterator(EntityCollection $collection, $callable)
+    protected function collectionIterator(Collection $collection, $callable)
     {
         $this->dbal->beginEntity();
 
