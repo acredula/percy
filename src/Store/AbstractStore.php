@@ -7,6 +7,7 @@ use Aura\Filter\FilterFactory;
 use InvalidArgumentException;
 use Percy\Decorator\DecoratorTrait;
 use Percy\Entity\Collection;
+use Percy\Exception\ValidationException;
 
 abstract class AbstractStore implements StoreInterface
 {
