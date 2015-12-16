@@ -39,8 +39,8 @@ class SqlStore extends AbstractStore
      */
     public function create(Collection $collection, array $scopes = [])
     {
-        $this->validate($collection);
         $this->decorate($collection, StoreInterface::ON_CREATE);
+        $this->validate($collection);
         return $this->collectionIterator($collection, 'insertEntity');
     }
 
@@ -74,8 +74,8 @@ class SqlStore extends AbstractStore
      */
     public function update(Collection $collection, array $scopes = [])
     {
-        $this->validate($collection);
         $this->decorate($collection, StoreInterface::ON_UPDATE);
+        $this->validate($collection);
         return $this->collectionIterator($collection, 'updateEntity');
     }
 
@@ -101,8 +101,8 @@ class SqlStore extends AbstractStore
      */
     public function delete(Collection $collection, array $scopes = [])
     {
-        $this->validate($collection);
         $this->decorate($collection, StoreInterface::ON_DELETE);
+        $this->validate($collection);
         return $this->collectionIterator($collection, 'deleteEntity');
     }
 
