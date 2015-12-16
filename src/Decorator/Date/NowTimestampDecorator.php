@@ -4,7 +4,7 @@ namespace Percy\Decorator\Date;
 
 use DateTime;
 
-class TimestampDecorator implements DecoratorInterface
+class NowTimestampDecorator implements DecoratorInterface
 {
     /**
      * {@inheritdoc}
@@ -13,8 +13,10 @@ class TimestampDecorator implements DecoratorInterface
     {
         foreach ($properties as $property) {
             if (isset($entity[$property])) {
-                $entity[$property] = (new DateTime)->format('U');
+                continue;
             }
+
+            $entity[$property] = (new DateTime)->format('U');
         }
     }
 }
