@@ -14,10 +14,6 @@ class NowTimestampDecorator implements DecoratorInterface
     public function __invoke(EntityInterface $entity, array $properties = [])
     {
         foreach ($properties as $property) {
-            if (isset($entity[$property])) {
-                continue;
-            }
-
             $entity[$property] = (new DateTime)->format('U');
         }
     }
