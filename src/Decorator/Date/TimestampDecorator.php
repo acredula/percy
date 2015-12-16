@@ -13,7 +13,7 @@ class TimestampDecorator implements DecoratorInterface
     {
         foreach ($properties as $property) {
             if (isset($entity[$property])) {
-                $entity[$property] = (new DateTime($entity[$property]))->format('U');
+                $entity[$property] = (new DateTime)->format('U');
             }
         }
     }
