@@ -46,7 +46,8 @@ abstract class AbstractStore implements StoreInterface
             $filter = $this->filter->newSubjectFilter($entity->getValidator());
 
             try {
-                $filter($entity->toArray());
+                $data = $entity->toArray([], false);
+                $filter($data);
             } catch (FilterFailed $e) {
                 throw new ValidationException($e->getMessage());
             }
