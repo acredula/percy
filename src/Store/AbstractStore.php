@@ -48,6 +48,11 @@ abstract class AbstractStore implements StoreInterface
 
             try {
                 $data = $entity->toArray([], false);
+
+                foreach (array_keys($entity->getMapping()) as $property) {
+                    $data[$property] = (array_key_exists($property, $data)) ? $data[$property] : null;
+                }
+
                 $filter($data);
             } catch (FilterFailed $e) {
                 throw new ValidationException($e->getMessage());
