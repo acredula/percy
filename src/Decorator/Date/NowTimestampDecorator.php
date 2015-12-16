@@ -4,6 +4,7 @@ namespace Percy\Decorator\Date;
 
 use DateTime;
 use Percy\Decorator\DecoratorInterface;
+use Percy\Entity\EntityInterface;
 
 class NowTimestampDecorator implements DecoratorInterface
 {
