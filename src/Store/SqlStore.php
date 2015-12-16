@@ -102,7 +102,6 @@ class SqlStore extends AbstractStore
     public function delete(Collection $collection, array $scopes = [])
     {
         $this->decorate($collection, StoreInterface::ON_DELETE);
-        $this->validate($collection);
         return $this->collectionIterator($collection, 'deleteEntity');
     }
 
