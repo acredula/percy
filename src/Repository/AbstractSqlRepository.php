@@ -130,11 +130,31 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function attachRelationships(Collection $collection, array $relationships = [])
+    public function attachRelationships(Collection $collection, array $relationships = [], $exclude = false)
     {
+        if ($exclude === false && empty($relationships)) {
+            return $collection;
+        }
+
         foreach ($collection->getIterator() as $entity) {
             $rels = $entity->getRelationships();
-            // @todo sort filtering of requested relationships
+
+            foreach ($rels as $key => $val) {
+                if (empty($relationships)) {
+                    continue;
+                }
+
+                if ($exclude === false && ! in_array($key, $relationships)) {
+                    unset($rels[$key]);
+                    continue;
+                }
+
+                if ($exclude === true && in_array($key, $relationships)) {
+                    unset($rels[$key]);
+                    continue;
+                }
+            }
+
             array_walk($rels, [$this, 'attachEntityRelationships'], $entity);
         }
 

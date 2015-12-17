@@ -87,7 +87,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $collection->addEntity(new EntityStub);
 
         $repo = new SqlRepositoryNoMapStub($dbal);
-        $repo->attachRelationships($collection);
+        $repo->attachRelationships($collection, ['some_relationship']);
     }
 
     /**
@@ -102,7 +102,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $collection->addEntity(new EntityStub);
 
         $repo = new SqlRepositoryPartialMapStub($dbal);
-        $repo->attachRelationships($collection);
+        $repo->attachRelationships($collection, ['some_relationship']);
     }
 
     /**
@@ -117,7 +117,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $collection->addEntity(new EntityStub);
 
         $repo = new SqlRepositoryIncompleteMapStub($dbal);
-        $repo->attachRelationships($collection);
+        $repo->attachRelationships($collection, ['some_relationship']);
     }
 
     /**
@@ -141,7 +141,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $repo = new SqlRepositoryStub($dbal);
 
-        $repo->attachRelationships($collection);
+        $repo->attachRelationships($collection, ['some_relationship']);
 
         $this->assertTrue(isset($entity['some_relationship']));
         $this->assertInstanceOf('Percy\Entity\Collection', $entity['some_relationship']);
