@@ -114,11 +114,11 @@ abstract class AbstractEntity implements EntityInterface
             );
         }
 
-        if (array_key_exists($offset, $mapping) && ! is_null($mapping[$offset])) {
+        if (array_key_exists($offset, $mapping) && ! is_null($mapping[$offset]) && ! is_null($value)) {
             settype($value, $mapping[$offset]);
         }
 
-        $this->data[$offset] = $value;
+        $this->data[$offset] = (empty($value)) ? null : $value;
     }
 
     /**
