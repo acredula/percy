@@ -26,10 +26,14 @@ class Collection implements IteratorAggregate, Countable
      */
     public function toArray(array $scopes = [])
     {
-        $collection = [];
+        $collection = [
+            'count'     => count($this),
+            'total'     => $this->getTotal(),
+            '_embedded' => []
+        ];
 
         foreach ($this->getIterator() as $entity) {
-            $collection[] = $entity->toArray($scopes);
+            $collection['_embedded'][$entity->getDataSource()][] = $entity->toArray($scopes);
         }
 
         return $collection;

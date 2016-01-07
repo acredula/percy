@@ -22,7 +22,7 @@ class EntityStub extends AbstractEntity implements EntityInterface
         'another_field' => []
     ];
 
-    protected $relationships = ['some_relationship' => 'Percy\Test\Asset\EntityStub'];
+    protected $relationships = ['some_relationship'];
 
     protected $validator = 'Acme\Validator\EntityValidator';
 

@@ -36,16 +36,42 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
-    public function toArray(array $scopes = [], $relationships = true)
+    public function toArray(array $scopes = [])
     {
         // @todo filter by scopes
-        foreach ($this->data as $key => $value) {
-            if ($value instanceof Collection && $relationships === true) {
-                $this->data[$key] = $value->toArray($scopes);
-            }
+        $data = [
+            '_relationships' => []
+        ];
+
+        foreach ($this->getRelationships() as $relationship) {
+            $data['_relationships'][$relationship] = [
+                '_links' => [
+                    'self' => [
+                        'href' => sprintf(
+                            '/%s/%s/%s',
+                            $this->getDataSource(),
+                            $this[$this->getPrimary()],
+                            $relationship
+                        )
+                    ]
+                ]
+            ];
         }
 
-        return $this->data;
+        $data['_relationships']['all'] = [
+            '_links' => [
+                'self' => [
+                    'href' => sprintf(
+                        '/%s/%s/%s',
+                        $this->getDataSource(),
+                        $this[$this->getPrimary()],
+                        implode(',', $this->getRelationships())
+                    )
+                ]
+            ]
+        ];
+
+        return array_merge($data, $this->data);
     }
 
     /**
@@ -108,7 +134,7 @@ abstract class AbstractEntity implements EntityInterface
     {
         $mapping = $this->getMapping();
 
-        if (! array_key_exists($offset, $mapping) && ! array_key_exists($offset, $this->getRelationships())) {
+        if (! array_key_exists($offset, $mapping)) {
             throw new InvalidArgumentException(
                 sprintf('(%s) is not an accepted field for (%s)', $offset, get_class($this))
             );

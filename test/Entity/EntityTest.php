@@ -48,8 +48,8 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     {
         $entity = new EntityStub;
 
-        $original = ['some_field' => 1, 'another_field' => 'some_value'];
-        $expected = ['some_field' => '1', 'another_field' => 'some_value'];
+        $original = ['uuid' => 'something', 'some_field' => 1, 'another_field' => 'some_value'];
+        $expected = ['uuid' => 'something', 'some_field' => '1', 'another_field' => 'some_value'];
 
         $entity->hydrate($original);
 
@@ -87,21 +87,6 @@ class EntityTest extends \PHPUnit_Framework_TestCase
 
         $entity = new EntityStub;
         $something = $entity['something'];
-    }
-
-    /**
-     * Asserts that a collection is arrayified.
-     */
-    public function testEntityProxiesOutToCollectionWhenItFindsOne()
-    {
-        $collection = $this->getMock('Percy\Entity\Collection');
-        $collection->expects($this->once())->method('toArray')->will($this->returnValue([]));
-
-        $entity = new EntityStub;
-
-        $entity['some_relationship'] = $collection;
-
-        $this->assertSame($entity->toArray(), ['some_relationship' => []]);
     }
 
     /**

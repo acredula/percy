@@ -11,12 +11,11 @@ interface EntityInterface extends ArrayAccess
      * Return array representation of up to date resource data. If passed an
      * array of scopes, the data will be filtered based on those scopes.
      *
-     * @param array   $scopes
-     * @param boolean $relationships
+     * @param array                                    $scopes
      *
      * @return array
      */
-    public function toArray(array $scopes = [], $relationships = true);
+    public function toArray(array $scopes = []);
 
     /**
      * Return array mapping of the data for the resource.
