@@ -59,11 +59,10 @@ interface RepositoryInterface
      *
      * @param \Percy\Entity\Collection $collection
      * @param array                    $relationships
-     * @param boolean                  $exclude whether $relationsips should be excluded or included
      *
      * @return \Percy\Entity\Collection
      */
-    public function attachRelationships(Collection $collection, array $relationships = [], $exclude = false);
+    public function getRelationshipsFor(Collection $collection, array $relationships = []);
 
     /**
      * Get the primary entity type associated with the repository.

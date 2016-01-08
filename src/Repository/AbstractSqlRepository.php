@@ -130,35 +130,20 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function attachRelationships(Collection $collection, array $relationships = [], $exclude = false)
+    public function getRelationshipsFor(Collection $collection, array $relationships = [])
     {
-        if ($exclude === false && empty($relationships)) {
-            return $collection;
-        }
+        $relationsips = new Collection;
+        $entities     = [];
 
         foreach ($collection->getIterator() as $entity) {
-            $rels = $entity->getRelationships();
-
-            foreach ($rels as $key => $val) {
-                if (empty($relationships)) {
-                    continue;
-                }
-
-                if ($exclude === false && ! in_array($key, $relationships)) {
-                    unset($rels[$key]);
-                    continue;
-                }
-
-                if ($exclude === true && in_array($key, $relationships)) {
-                    unset($rels[$key]);
-                    continue;
-                }
-            }
-
-            array_walk($rels, [$this, 'attachEntityRelationships'], $entity);
+            array_walk($entity->getRelationships(), [$this, 'getEntityRelationships'], $entity, $entities);
         }
 
-        return $collection;
+        foreach ($entities as $entity) {
+            $relationships->addEntity($entity);
+        }
+
+        return $relationships;
     }
 
     /**
@@ -167,12 +152,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      * @param string                        $entityType
      * @param string                        $relationship
      * @param \Percy\Entity\EntityInterface $entity
-     *
-     * @throws \RuntimeException when relationship has not been properly defined
+     * @param array                         $entities
      *
      * @return void
      */
-    protected function attachEntityRelationships($entityType, $relationship, EntityInterface $entity)
+    protected function getEntityRelationships($entityType, $relationship, EntityInterface $entity, array &$entities)
     {
         $map = $this->getRelationshipMap($relationship);
 
@@ -194,13 +178,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         $remove = [$map['defined_in']['primary'], $map['target']['relationship']];
 
-        foreach ($result as &$resource) {
+        foreach ($result as $resource) {
             $resource = array_filter($resource, function ($key) use ($remove) {
                 return (! in_array($key, $remove));
             }, ARRAY_FILTER_USE_KEY);
-        }
 
-        $entity[$relationship] = $this->buildCollection($result, $entityType);
+            $entities[] = (new $entityType)->hydrate($resource);
+        }
     }
 
     /**
