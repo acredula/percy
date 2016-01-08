@@ -132,18 +132,19 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getRelationshipsFor(Collection $collection, array $relationships = [])
     {
-        $relationsips = new Collection;
-        $entities     = [];
+        $relCollection = new Collection;
+        $entities      = [];
 
         foreach ($collection->getIterator() as $entity) {
-            array_walk($entity->getRelationships(), [$this, 'getEntityRelationships'], $entity, $entities);
+            $rels = $entity->getRelationships();
+            array_walk($rels, [$this, 'getEntityRelationships'], $entity, $entities);
         }
 
         foreach ($entities as $entity) {
-            $relationships->addEntity($entity);
+            $relCollection->addEntity($entity);
         }
 
-        return $relationships;
+        return $relCollection;
     }
 
     /**
