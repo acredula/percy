@@ -133,15 +133,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function getRelationshipsFor(Collection $collection, array $relationships = [])
     {
         $relCollection = new Collection;
-        $entities      = [];
 
         foreach ($collection->getIterator() as $entity) {
             $rels = $entity->getRelationships();
-            array_walk($rels, [$this, 'getEntityRelationships'], $entity, $entities);
-        }
-
-        foreach ($entities as $entity) {
-            $relCollection->addEntity($entity);
+            array_walk($rels, [$this, 'getEntityRelationships'], [
+                'entity'     => $entity,
+                'collection' => $relCollection
+            ]);
         }
 
         return $relCollection;
@@ -150,16 +148,17 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Attach relationships to a specific entity.
      *
-     * @param string                        $entityType
-     * @param string                        $relationship
-     * @param \Percy\Entity\EntityInterface $entity
-     * @param array                         $entities
+     * @param string $entityType
+     * @param string $relationship
+     * @param array  $entities
      *
      * @return void
      */
-    protected function getEntityRelationships($entityType, $relationship, EntityInterface $entity, array &$entities)
+    protected function getEntityRelationships($entityType, $relationship, array $userData)
     {
-        $map = $this->getRelationshipMap($relationship);
+        $collection = $userData['collection'];
+        $entity     = $userData['entity'];
+        $map        = $this->getRelationshipMap($relationship);
 
         $query = sprintf(
             'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
@@ -184,7 +183,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 return (! in_array($key, $remove));
             }, ARRAY_FILTER_USE_KEY);
 
-            $entities[] = (new $entityType)->hydrate($resource);
+            $collection->addEntity((new $entityType)->hydrate($resource));
         }
     }
 
