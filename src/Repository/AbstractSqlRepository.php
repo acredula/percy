@@ -138,7 +138,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $rels = $entity->getRelationships();
             array_walk($rels, [$this, 'getEntityRelationships'], [
                 'entity'     => $entity,
-                'collection' => $relCollection
+                'collection' => $relCollection,
+                'include'    => $relationships
             ]);
         }
 
@@ -157,8 +158,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     protected function getEntityRelationships($entityType, $relationship, array $userData)
     {
         $collection = $userData['collection'];
+        $include    = $userData['include'];
         $entity     = $userData['entity'];
         $map        = $this->getRelationshipMap($relationship);
+
+        if (! in_array($relationship, $include)) {
+            return false;
+        }
 
         $query = sprintf(
             'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
