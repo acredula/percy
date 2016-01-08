@@ -42,7 +42,7 @@ abstract class AbstractEntity implements EntityInterface
             '_relationships' => []
         ];
 
-        foreach ($this->getRelationships() as $relationship) {
+        foreach ($this->getRelationships() as $relationship => $entity) {
             $data['_relationships'][$relationship] = [
                 '_links' => [
                     'self' => [
@@ -64,7 +64,7 @@ abstract class AbstractEntity implements EntityInterface
                         '/%s/%s/%s',
                         $this->getDataSource(),
                         $this[$this->getPrimary()],
-                        implode(',', $this->getRelationships())
+                        implode(',', array_keys($this->getRelationships()))
                     )
                 ]
             ]
