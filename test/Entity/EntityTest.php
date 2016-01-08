@@ -38,7 +38,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     {
         $rels = (new EntityStub)->getRelationships();
 
-        $this->assertSame($rels, ['some_relationship' => 'Percy\Test\Asset\EntityStub']);
+        $this->assertSame($rels, ['some_relationship']);
     }
 
     /**
@@ -59,12 +59,13 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($entity['some_field'], '1');
         $this->assertSame($entity['another_field'], 'some_value');
 
-        $this->assertSame($expected, $entity->toArray());
+        $this->assertSame($expected, $entity->getData());
 
         unset($entity['some_field']);
         unset($entity['another_field']);
+        unset($entity['uuid']);
 
-        $this->assertEmpty($entity->toArray());
+        $this->assertEmpty($entity->getData());
     }
 
     /**

@@ -18,7 +18,7 @@ class Collection implements IteratorAggregate, Countable
     protected $total = 0;
 
     /**
-     * Return indexed array of array representations of entities.
+     * Return api representation of collection.
      *
      * @param array $scopes
      *
@@ -37,6 +37,24 @@ class Collection implements IteratorAggregate, Countable
         }
 
         return $collection;
+    }
+
+    /**
+     * Return raw array representation of data.
+     *
+     * @param array $scopes
+     *
+     * @return array
+     */
+    public function getData(array $scopes = [])
+    {
+        $data = [];
+
+        foreach ($this->getIterator() as $entity) {
+            $data[] = $entity->getData($scopes);
+        }
+
+        return $data;
     }
 
     /**

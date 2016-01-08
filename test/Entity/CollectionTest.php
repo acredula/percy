@@ -19,7 +19,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             $arrayCollection[] = $data;
 
             $entity = $this->getMock('Percy\Entity\EntityInterface');
-            $entity->expects($this->exactly(2))->method('toArray')->will($this->returnValue($data));
+            $entity->expects($this->exactly(2))->method('getData')->will($this->returnValue($data));
 
             $collection->addEntity($entity);
 
@@ -29,13 +29,13 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $i = 0;
 
         foreach ($collection->getIterator() as $entity) {
-            $this->assertSame($entity->toArray(), [
+            $this->assertSame($entity->getData(), [
                 'entity' => $i
             ]);
 
             $i++;
         }
 
-        $this->assertSame($arrayCollection, $collection->toArray());
+        $this->assertSame($arrayCollection, $collection->getData());
     }
 }

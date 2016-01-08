@@ -38,7 +38,6 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function toArray(array $scopes = [])
     {
-        // @todo filter by scopes
         $data = [
             '_relationships' => []
         ];
@@ -71,7 +70,16 @@ abstract class AbstractEntity implements EntityInterface
             ]
         ];
 
-        return array_merge($data, $this->data);
+        return array_merge($this->getData($scopes), $data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getData(array $scopes = [])
+    {
+        // @todo filter by scopes
+        return $this->data;
     }
 
     /**

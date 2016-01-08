@@ -8,14 +8,22 @@ use Percy\Entity\Decorator\DecoratorInterface;
 interface EntityInterface extends ArrayAccess
 {
     /**
-     * Return array representation of up to date resource data. If passed an
-     * array of scopes, the data will be filtered based on those scopes.
+     * Return api representation of entity with _links.
      *
-     * @param array                                    $scopes
+     * @param array $scopes
      *
      * @return array
      */
     public function toArray(array $scopes = []);
+
+    /**
+     * Return raw entity data filtered by scopes.
+     *
+     * @param array $scopes
+     *
+     * @return void
+     */
+    public function getData(array $scopes = []);
 
     /**
      * Return array mapping of the data for the resource.
