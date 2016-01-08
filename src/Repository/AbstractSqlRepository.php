@@ -150,7 +150,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @param string $entityType
      * @param string $relationship
-     * @param array  $entities
+     * @param array  $userData
      *
      * @return void
      */
