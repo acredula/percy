@@ -152,7 +152,7 @@ abstract class AbstractEntity implements EntityInterface
             settype($value, $mapping[$offset]);
         }
 
-        $this->data[$offset] = (empty($value)) ? null : $value;
+        $this->data[$offset] = (! isset($value)) ? null : $value;
     }
 
     /**
