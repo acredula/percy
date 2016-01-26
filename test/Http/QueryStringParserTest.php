@@ -45,7 +45,8 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
                 [
                     'field'     => 'field',
                     'delimiter' => '=',
-                    'value'     => 'value'
+                    'value'     => 'value',
+                    'binding'   => 'field_0'
                 ]
             ]
         ], $query);
@@ -66,12 +67,14 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
                 [
                     'field'     => 'field',
                     'delimiter' => '=',
-                    'value'     => 'value'
+                    'value'     => 'value',
+                    'binding'   => 'field_0'
                 ],
                 [
                     'field'     => 'field2',
                     'delimiter' => '<',
-                    'value'     => 'value2'
+                    'value'     => 'value2',
+                    'binding'   => 'field2_1'
                 ]
             ]
         ], $query);
