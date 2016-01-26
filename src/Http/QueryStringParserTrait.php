@@ -71,6 +71,7 @@ trait QueryStringParserTrait
     protected function parseFilters(array $filters)
     {
         $mapped = [];
+        $param  = 0;
 
         foreach ($filters as $filter) {
             $filter = explode('|', $filter);
@@ -83,6 +84,7 @@ trait QueryStringParserTrait
 
             $filter = array_combine(['field', 'delimiter', 'value'], $filter);
 
+            $filter['binding']  = $filter['field'] . '_' . $param++;
             $filter['delimiter'] = strtolower($filter['delimiter']);
             $filter['delimiter'] = html_entity_decode($filter['delimiter']);
 
