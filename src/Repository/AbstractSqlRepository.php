@@ -89,9 +89,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         if (array_key_exists('filter', $rules)) {
             foreach ($rules['filter'] as $key => $where) {
                 $keyword = ($key === 0) ? ' WHERE' : ' AND';
-                $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['field']);
+                $query  .= sprintf('%s %s %s :%s', $keyword, $where['field'], $where['delimiter'], $where['binding']);
 
-                $params[$where['field']] = $where['value'];
+                $params[$where['binding']] = $where['value'];
             }
         }
 
