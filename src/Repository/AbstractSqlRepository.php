@@ -203,7 +203,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @return array
      */
-    protected function getRelationshipMap($relationship)
+    public function getRelationshipMap($relationship)
     {
         if (! array_key_exists($relationship, $this->relationships)) {
             throw new InvalidArgumentException(
