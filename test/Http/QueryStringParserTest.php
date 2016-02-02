@@ -81,7 +81,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that the sanitiser maps a in filters.
+     * Asserts that the sanitiser maps in filters.
      */
     public function testSanitiserMapsInFilters()
     {
@@ -103,7 +103,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Asserts that the sanitiser maps a not in filters.
+     * Asserts that the sanitiser maps not in filters.
      */
     public function testSanitiserMapsNotInFilters()
     {
