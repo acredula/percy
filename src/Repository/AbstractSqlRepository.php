@@ -90,7 +90,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             foreach ($rules['filter'] as $key => $where) {
                 $keyword   = ($key === 0) ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
-                $binding   = ($delimiter === 'IN') ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
+                $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
                 $query    .= sprintf('%s %s %s %s', $keyword, $where['field'], $delimiter, $binding);
 
                 $params[$where['binding']] = $where['value'];

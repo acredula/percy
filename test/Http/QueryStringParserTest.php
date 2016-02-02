@@ -81,6 +81,50 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Asserts that the sanitiser maps a in filters.
+     */
+    public function testSanitiserMapsInFilters()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|in|tomato,bbq');
+
+        $this->assertEquals([
+            'sort'   => 'something',
+            'filter' => [
+                [
+                    'field'     => 'sauces',
+                    'delimiter' => 'in',
+                    'value'     => 'tomato,bbq',
+                    'binding'   => 'sauces_0'
+                ]
+            ]
+        ], $query);
+    }
+
+    /**
+     * Asserts that the sanitiser maps a not in filters.
+     */
+    public function testSanitiserMapsNotInFilters()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|not in|tomato,bbq');
+
+        $this->assertEquals([
+            'sort'   => 'something',
+            'filter' => [
+                [
+                    'field'     => 'sauces',
+                    'delimiter' => 'not in',
+                    'value'     => 'tomato,bbq',
+                    'binding'   => 'sauces_0'
+                ]
+            ]
+        ], $query);
+    }
+
+    /**
      * Asserts that the sanitiser throws an exception when filter is malformed.
      */
     public function testMalformedFilterThrowsException()
