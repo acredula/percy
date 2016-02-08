@@ -125,6 +125,50 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Asserts that the sanitiser maps like filters.
+     */
+    public function testSanitiserMapsLikeFilters()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|like|%sauce');
+
+        $this->assertEquals([
+            'sort'   => 'something',
+            'filter' => [
+                [
+                    'field'     => 'sauces',
+                    'delimiter' => 'like',
+                    'value'     => '%sauce',
+                    'binding'   => 'sauces_0'
+                ]
+            ]
+        ], $query);
+    }
+
+    /**
+     * Asserts that the sanitiser maps not like filters.
+     */
+    public function testSanitiserMapsNotLikeFilters()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|not like|soy%');
+
+        $this->assertEquals([
+            'sort'   => 'something',
+            'filter' => [
+                [
+                    'field'     => 'sauces',
+                    'delimiter' => 'not like',
+                    'value'     => 'soy%',
+                    'binding'   => 'sauces_0'
+                ]
+            ]
+        ], $query);
+    }
+
+    /**
      * Asserts that the sanitiser throws an exception when filter is malformed.
      */
     public function testMalformedFilterThrowsException()
