@@ -89,7 +89,7 @@ trait QueryStringParserTrait
             $filter['delimiter'] = html_entity_decode($filter['delimiter']);
 
             if (! in_array($filter['delimiter'], [
-                '=', '!=', '<>', '<=', '>=', '<', '>', 'in', 'not in'
+                '=', '!=', '<>', '<=', '>=', '<', '>', 'in', 'not in', 'like', 'not like'
             ])) {
                 throw new InvalidArgumentException(sprintf('(%s) is not an accepted delimiter', $filter['delimiter']));
             }
