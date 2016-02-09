@@ -70,7 +70,7 @@ abstract class AbstractEntity implements EntityInterface
             ]
         ];
 
-        return array_merge($this->getData($scopes), $data);
+        return array_merge($this->getData($scopes, false), $data);
     }
 
     /**

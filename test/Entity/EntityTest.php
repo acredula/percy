@@ -15,9 +15,10 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $mapping = (new EntityStub)->getMapping();
 
         $this->assertSame($mapping, [
-            'uuid'          => null,
-            'some_field'    => 'string',
-            'another_field' => null
+            'uuid'           => null,
+            'some_field'     => 'string',
+            'another_field'  => null,
+            'do_not_persist' => null
         ]);
     }
 
@@ -38,7 +39,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
     {
         $rels = (new EntityStub)->getRelationships();
 
-        $this->assertSame($rels, ['some_relationship']);
+        $this->assertSame($rels, ['some_relationship' => EntityStub::class]);
     }
 
     /**
@@ -105,5 +106,43 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $this->assertSame($entity->getDecorators(0), ['Acme\Decorator' => ['some_field']]);
+    }
+
+    /**
+     * Asserts that the entity builds the correct array structure.
+     */
+    public function testEntityBuildsCorrectArray()
+    {
+        $entity = new EntityStub;
+
+        $entity->hydrate([
+            'uuid'           => 'uuid',
+            'some_field'     => 'some_field',
+            'another_field'  => 'another_field',
+            'do_not_persist' => 'do_not_persist'
+        ]);
+
+        $this->assertSame($entity->toArray(), [
+            'uuid'           => 'uuid',
+            'some_field'     => 'some_field',
+            'another_field'  => 'another_field',
+            'do_not_persist' => 'do_not_persist',
+            '_relationships' => [
+                'some_relationship' => [
+                    '_links' => [
+                        'self' => [
+                            'href' => '/some_table/uuid/some_relationship'
+                        ]
+                    ]
+                ],
+                'all' => [
+                    '_links' => [
+                        'self' => [
+                            'href' => '/some_table/uuid/some_relationship'
+                        ]
+                    ]
+                ]
+            ]
+        ]);
     }
 }

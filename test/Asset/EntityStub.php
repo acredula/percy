@@ -15,14 +15,13 @@ class EntityStub extends AbstractEntity implements EntityInterface
     ];
 
     protected $mapping = [
-        'uuid'       => [],
-        'some_field' => [
-            'type'       => 'string'
-        ],
-        'another_field' => []
+        'uuid'           => [],
+        'some_field'     => ['type' => 'string'],
+        'another_field'  => [],
+        'do_not_persist' => ['persist' => false]
     ];
 
-    protected $relationships = ['some_relationship'];
+    protected $relationships = ['some_relationship' => EntityStub::class];
 
     protected $validator = 'Acme\Validator\EntityValidator';
 
