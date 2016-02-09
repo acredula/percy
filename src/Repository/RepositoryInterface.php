@@ -11,21 +11,37 @@ interface RepositoryInterface
      * Count resources based on parameters attached to the request object.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param string                                   $joins
+     * @param string                                   $conditionals
+     * @param string                                   $end
      *
      * @return integer
      */
-    public function countFromRequest(ServerRequestInterface $request);
+    public function countFromRequest(
+        ServerRequestInterface $request,
+        $joins        = '',
+        $conditionals = '',
+        $end          = ''
+    );
 
     /**
      * Get resources based on parameters attached to the request object.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param string                                   $start
+     * @param string                                   $joins
+     * @param string                                   $conditionals
      * @param string                                   $end
      *
      * @return \Percy\Entity\Collection
      */
-    public function getFromRequest(ServerRequestInterface $request, $start = 'SELECT * FROM ', $end = '');
+    public function getFromRequest(
+        ServerRequestInterface $request,
+        $start        = 'SELECT * FROM ',
+        $joins        = '',
+        $conditionals = '',
+        $end          = ''
+    );
 
     /**
      * Count resources by field name => values.

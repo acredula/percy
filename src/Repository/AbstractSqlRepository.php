@@ -40,10 +40,16 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function countFromRequest(ServerRequestInterface $request)
+    public function countFromRequest(ServerRequestInterface $request, $joins = '', $conditionals = '', $end = '')
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ', '');
+        list($query, $params) = $this->buildQueryFromRules(
+            $rules,
+            'SELECT COUNT(*) as total FROM ',
+            $joins,
+            $conditionals,
+            $end
+        );
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
@@ -51,11 +57,16 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromRequest(ServerRequestInterface $request, $start = 'SELECT * FROM ', $end = '')
-    {
+    public function getFromRequest(
+        ServerRequestInterface $request,
+        $start        = 'SELECT * FROM ',
+        $joins        = '',
+        $conditionals = '',
+        $end          = ''
+    ) {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
 
-        list($query, $params) = $this->buildQueryFromRules($rules, $start, $end);
+        list($query, $params) = $this->buildQueryFromRules($rules, $start, $joins, $conditionals, $end);
 
         if (array_key_exists('sort', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
@@ -69,7 +80,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         }
 
         return $this->buildCollection($this->dbal->fetchAll($query, $params))
-                    ->setTotal($this->countFromRequest($request));
+                    ->setTotal($this->countFromRequest($request, $joins, $conditionals, $end));
     }
 
     /**
@@ -77,19 +88,23 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @param array  $rules
      * @param string $start
+     * @param string $joins
+     * @param string $conditionals
      * @param string $end
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start, $end)
+    protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end)
     {
-        $query = $start . $this->getTable();
+        $query  = $start . $this->getTable();
+        $query .= $joins;
+        $query .= $conditionals;
 
         $params = [];
 
         if (array_key_exists('filter', $rules)) {
             foreach ($rules['filter'] as $key => $where) {
-                $keyword   = ($key === 0) ? ' WHERE' : ' AND';
+                $keyword   = ($key === 0 || $conditionals !== '') ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
                 $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
                 $query    .= sprintf('%s %s %s %s', $keyword, $where['field'], $delimiter, $binding);
