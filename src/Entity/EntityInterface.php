@@ -19,11 +19,12 @@ interface EntityInterface extends ArrayAccess
     /**
      * Return raw entity data filtered by scopes.
      *
-     * @param array $scopes
+     * @param array   $scopes
+     * @param boolean $toPersist
      *
      * @return void
      */
-    public function getData(array $scopes = []);
+    public function getData(array $scopes = [], $toPersist = true);
 
     /**
      * Return array mapping of the data for the resource.

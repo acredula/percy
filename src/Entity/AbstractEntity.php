@@ -76,10 +76,27 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
-    public function getData(array $scopes = [])
+    public function getData(array $scopes = [], $toPersist = true)
     {
         // @todo filter by scopes
-        return $this->data;
+
+        if ($toPersist === false) {
+            return $this->data;
+        }
+
+        $data = [];
+
+        foreach ($this->mapping as $prop => $options) {
+            if (array_key_exists('persist', $options) && $options['persist'] === false) {
+                continue;
+            }
+
+            if (array_key_exists($prop, $this->data)) {
+                $data[$prop] = $this->data[$prop];
+            }
+        }
+
+        return $data;
     }
 
     /**
@@ -90,7 +107,7 @@ abstract class AbstractEntity implements EntityInterface
         return array_combine(array_keys($this->mapping), array_map(function ($value) {
             return (array_key_exists('type', $value)) ? $value['type'] : null;
         }, $this->mapping));
-}
+    }
 
     /**
      * {@inheritdoc}
