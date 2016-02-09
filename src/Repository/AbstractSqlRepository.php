@@ -96,9 +96,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end)
     {
-        $query  = $start . $this->getTable();
-        $query .= $joins;
-        $query .= $conditionals;
+        $start = $start . $this.getTable();
+        $query = sprintf('%s %s %s', $start, $joins, $conditionals);
 
         $params = [];
 
@@ -113,7 +112,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
         }
 
-        $query .= $end;
+        $query .= " {$end}";
 
         return [$query, $params];
     }
