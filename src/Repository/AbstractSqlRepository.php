@@ -205,7 +205,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return false;
         }
 
-        $start = sprintf(
+        $query = sprintf(
             'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
             $map['defined_in']['table'],
             $map['target']['table'],
