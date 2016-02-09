@@ -46,7 +46,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         list($query, $params) = $this->buildQueryFromRules(
             $rules,
-            'SELECT COUNT(*) as total FROM ',
+            'SELECT COUNT(*) as total FROM',
             $joins,
             $conditionals,
             $end
@@ -60,7 +60,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getFromRequest(
         ServerRequestInterface $request,
-        $start        = 'SELECT * FROM ',
+        $start        = 'SELECT * FROM',
         $joins        = '',
         $conditionals = '',
         $end          = ''
@@ -87,18 +87,25 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Build a base query without sorting and limits from filter rules.
      *
-     * @param array  $rules
-     * @param string $start
-     * @param string $joins
-     * @param string $conditionals
-     * @param string $end
+     * @param array       $rules
+     * @param string      $start
+     * @param string      $joins
+     * @param string      $conditionals
+     * @param string      $end
+     * @param string|null $table
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end)
+    protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end, $table = null)
     {
-        $start = $start . $this->getTable();
-        $query = sprintf('%s %s %s', $start, $joins, $conditionals);
+        $table = (is_null($table)) ? $this->getTable() : $table;
+        $query = sprintf(
+            '%s %s %s %s',
+            trim($start),
+            trim($table),
+            trim($joins),
+            trim($conditionals)
+        );
 
         $params = [];
 
@@ -198,7 +205,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return false;
         }
 
-        $query = sprintf(
+        $start = sprintf(
             'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
             $map['defined_in']['table'],
             $map['target']['table'],
