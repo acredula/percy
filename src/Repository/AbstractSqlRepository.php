@@ -43,7 +43,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
+        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ', '');
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
@@ -51,11 +51,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromRequest(ServerRequestInterface $request)
+    public function getFromRequest(ServerRequestInterface $request, $start = 'SELECT * FROM ', $end = '')
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
 
-        list($query, $params) = $this->buildQueryFromRules($rules);
+        list($query, $params) = $this->buildQueryFromRules($rules, $start, $end);
 
         if (array_key_exists('sort', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
@@ -77,10 +77,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @param array  $rules
      * @param string $start
+     * @param string $end
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start = 'SELECT * FROM ')
+    protected function buildQueryFromRules(array $rules, $start, $end)
     {
         $query = $start . $this->getTable();
 
@@ -97,6 +98,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
         }
 
+        $query .= $end;
+
         return [$query, $params];
     }
 
@@ -105,7 +108,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function countByField($field, $value)
     {
-        $query = sprintf('SELECT COUNT(*) as total FROM %s WHERE %s IN (:%s)', $this->getTable(), $field, $field);
+        $query = sprintf(
+            'SELECT COUNT(*) as total FROM %s WHERE %s.%s IN (:%s)',
+            $this->getTable(),
+            $this->getTable(),
+            $field,
+            $field
+        );
 
         $params = [
             $field => implode(',', (array) $value)
@@ -119,7 +128,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     public function getByField($field, $value)
     {
-        $query = sprintf('SELECT * FROM %s WHERE %s IN (:%s)', $this->getTable(), $field, $field);
+        $query = sprintf(
+            'SELECT * FROM %s WHERE %s.%s IN (:%s)',
+            $this->getTable(),
+            $this->getTable(),
+            $field,
+            $field
+        );
 
         $params = [
             $field => implode(',', (array) $value)
