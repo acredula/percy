@@ -55,14 +55,14 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $dbal = $this->getMock('Aura\Sql\ExtendedPdoInterface');
 
         $dbal->expects($this->at(0))->method('fetchAll')->with(
-            $this->equalTo('SELECT * FROM some_table WHERE field IN (:field)'),
+            $this->equalTo('SELECT * FROM some_table WHERE some_table.field IN (:field)'),
             $this->equalTo(['field' => 'value1,value2'])
         )->will(
             $this->returnValue([[], []])
         );
 
         $dbal->expects($this->at(1))->method('fetchOne')->with(
-            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field IN (:field)'),
+            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE some_table.field IN (:field)'),
             $this->equalTo(['field' => 'value1,value2'])
         )->will(
             $this->returnValue(['total' => 10])
