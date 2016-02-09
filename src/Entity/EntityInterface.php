@@ -22,7 +22,7 @@ interface EntityInterface extends ArrayAccess
      * @param array   $scopes
      * @param boolean $toPersist
      *
-     * @return void
+     * @return array
      */
     public function getData(array $scopes = [], $toPersist = true);
 
