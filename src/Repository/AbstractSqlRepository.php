@@ -43,6 +43,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function countFromRequest(ServerRequestInterface $request, $joins = '', $conditionals = '', $end = '')
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
+
         list($query, $params) = $this->buildQueryFromRules(
             $rules,
             'SELECT COUNT(*) as total FROM ',
@@ -96,9 +97,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      */
     protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end)
     {
-        $query  = $start . $this->getTable();
-        $query .= $joins;
-        $query .= $conditionals;
+        $start = $start . $this->getTable();
+        $query = sprintf('%s %s %s', $start, $joins, $conditionals);
 
         $params = [];
 
@@ -113,7 +113,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
         }
 
-        $query .= $end;
+        $query .= " {$end}";
 
         return [$query, $params];
     }

@@ -84,7 +84,7 @@ trait QueryStringParserTrait
 
             $filter = array_combine(['field', 'delimiter', 'value'], $filter);
 
-            $filter['binding']   = $filter['field'] . '_' . $param++;
+            $filter['binding']   = str_replace('.', '_', $filter['field']) . '_' . $param++;
             $filter['delimiter'] = strtolower($filter['delimiter']);
             $filter['delimiter'] = html_entity_decode($filter['delimiter']);
 
