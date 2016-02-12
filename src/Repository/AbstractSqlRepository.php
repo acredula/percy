@@ -4,16 +4,19 @@ namespace Percy\Repository;
 
 use Aura\Sql\ExtendedPdoInterface;
 use InvalidArgumentException;
+use Percy\Decorator\DecoratorTrait;
 use Percy\Entity\Collection;
 use Percy\Entity\CollectionBuilderTrait;
 use Percy\Entity\EntityInterface;
 use Percy\Http\QueryStringParserTrait;
+use Percy\Store\StoreInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 
 abstract class AbstractSqlRepository implements RepositoryInterface
 {
     use CollectionBuilderTrait;
+    use DecoratorTrait;
     use QueryStringParserTrait;
 
     /**
@@ -80,8 +83,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $query .= $rules['limit'];
         }
 
-        return $this->buildCollection($this->dbal->fetchAll($query, $params))
-                    ->setTotal($this->countFromRequest($request, $joins, $conditionals, $end));
+        $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
+                           ->setTotal($this->countFromRequest($request, $joins, $conditionals, $end));
+
+        $this->decorate($collection, StoreInterface::ON_READ);
+
+        return $collection;
     }
 
     /**
@@ -162,8 +169,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field => implode(',', (array) $value)
         ];
 
-        return $this->buildCollection($this->dbal->fetchAll($query, $params))
-                    ->setTotal($this->countByField($field, $value));
+        $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
+                           ->setTotal($this->countByField($field, $value));
+
+        $this->decorate($collection, StoreInterface::ON_READ);
+
+        return $collection;
     }
 
     /**
