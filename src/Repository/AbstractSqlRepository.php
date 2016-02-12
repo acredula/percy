@@ -169,7 +169,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field => implode(',', (array) $value)
         ];
 
-        $collection = $this->buildCollection([$this->dbal->fetchOne($query, $params)])
+        $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
                            ->setTotal($this->countByField($field, $value));
 
         $this->decorate($collection, StoreInterface::ON_READ);
