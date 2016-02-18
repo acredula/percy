@@ -146,4 +146,33 @@ class SqlStore extends AbstractStore
         $this->dbal->commit();
         return true;
     }
+    
+    /**
+     * Persist relationships to data store.
+     *
+     * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $rels
+     * @param array                         $map
+     *
+     * @return void
+     */
+    public function relationships(EntityInterface $entity, array $rels, array $map)
+    {
+        $this->dbal->beginTransaction();
+
+        foreach ($rels as $rel) {
+            $data = [
+                $map['defined_in']['primary']  => $entity[$map['defined_in']['entity']],
+                $map['target']['relationship'] => $rel
+            ];
+
+            $insert = $this->query->newInsert();
+            $insert->into($map['defined_in']['table']);
+            $insert->cols($data);
+
+            $this->dbal->perform($insert->getStatement(), $insert->getBindValues());
+        }
+
+        $this->dbal->commit();
+    }
 }
