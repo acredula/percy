@@ -164,6 +164,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $include                        = null,
         ServerRequestInterface $request = null
     ) {
+        if (is_null($include)) {
+            return;
+        }
+
         foreach ($this->getRelationshipMap() as $key => $map) {
             if (is_array($include) && ! in_array($key, $include)) {
                 continue;
