@@ -27,14 +27,14 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $request->expects($this->exactly(2))->method('getUri')->will($this->returnValue($uri));
 
         $dbal->expects($this->at(0))->method('fetchAll')->with(
-            $this->equalTo('SELECT * FROM some_table   WHERE field1 = :field1_0 AND field2 <> :field2_1  ORDER BY something DESC LIMIT 0,50'),
+            $this->equalTo('SELECT * FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1 ORDER BY something DESC LIMIT 0,50'),
             $this->equalTo(['field1_0' => 'value1', 'field2_1' => 'value2'])
         )->will(
             $this->returnValue([[], []])
         );
 
         $dbal->expects($this->at(1))->method('fetchOne')->with(
-            $this->equalTo('SELECT COUNT(*) as total FROM some_table   WHERE field1 = :field1_0 AND field2 <> :field2_1 '),
+            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1'),
             $this->equalTo(['field1_0' => 'value1', 'field2_1' => 'value2'])
         )->will(
             $this->returnValue(['total' => 10])

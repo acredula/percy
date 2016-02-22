@@ -19,7 +19,9 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             $arrayCollection[] = $data;
 
             $entity = $this->getMock('Percy\Entity\EntityInterface');
+            $entity->expects($this->any())->method('getDataSource')->will($this->returnValue('test'));
             $entity->expects($this->exactly(2))->method('getData')->will($this->returnValue($data));
+            $entity->expects($this->exactly(1))->method('toArray')->will($this->returnValue($data));
 
             $collection->addEntity($entity);
 
@@ -37,5 +39,10 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         }
 
         $this->assertSame($arrayCollection, $collection->getData());
+        $this->assertSame([
+            'count'     => 10,
+            'total'     => 10,
+            '_embedded' => ['test' => $arrayCollection]
+        ], $collection->toArray());
     }
 }

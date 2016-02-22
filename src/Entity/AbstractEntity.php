@@ -21,6 +21,11 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * @var array
      */
+    protected $relationshipMap = [];
+
+    /**
+     * @var array
+     */
     protected $relationships = [];
 
     /**
@@ -42,33 +47,9 @@ abstract class AbstractEntity implements EntityInterface
             '_relationships' => []
         ];
 
-        foreach ($this->getRelationships() as $relationship => $entity) {
-            $data['_relationships'][$relationship] = [
-                '_links' => [
-                    'self' => [
-                        'href' => sprintf(
-                            '/%s/%s/%s',
-                            $this->getDataSource(),
-                            $this[$this->getPrimary()],
-                            $relationship
-                        )
-                    ]
-                ]
-            ];
+        foreach ($this->getRelationships() as $key => $value) {
+            $data['_relationships'][$key] = $value->toArray($scopes);
         }
-
-        $data['_relationships']['all'] = [
-            '_links' => [
-                'self' => [
-                    'href' => sprintf(
-                        '/%s/%s/%s',
-                        $this->getDataSource(),
-                        $this[$this->getPrimary()],
-                        implode(',', array_keys($this->getRelationships()))
-                    )
-                ]
-            ]
-        ];
 
         return array_merge($this->getData($scopes, false), $data);
     }
@@ -112,9 +93,27 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
+    public function getRelationshipMap()
+    {
+        return $this->relationshipMap;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getRelationships()
     {
         return $this->relationships;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addRelationship($relationship, Collection $collection)
+    {
+        $this->relationships[$relationship] = $collection;
+
+        return $this;
     }
 
     /**
