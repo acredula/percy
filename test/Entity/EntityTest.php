@@ -130,4 +130,19 @@ class EntityTest extends \PHPUnit_Framework_TestCase
             '_relationships' => []
         ]);
     }
+
+    /**
+     * Asserts that an entity can add a relationship.
+     */
+    public function testEntityCanAddRelationship()
+    {
+        $collection = $this->getMock('Percy\Entity\Collection');
+
+        $entity = new EntityStub;
+
+        $entity->addRelationship('test', $collection);
+
+        $this->assertArrayHasKey('test', $entity->getRelationships());
+        $this->assertSame($collection, $entity->getRelationships()['test']);
+    }
 }
