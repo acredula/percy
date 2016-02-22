@@ -37,7 +37,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testEntityReturnsRelationships()
     {
-        $rels = (new EntityStub)->getRelationships();
+        $rels = (new EntityStub)->getRelationshipMap();
 
         $this->assertSame($rels, ['some_relationship' => EntityStub::class]);
     }
@@ -127,22 +127,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
             'some_field'     => 'some_field',
             'another_field'  => 'another_field',
             'do_not_persist' => 'do_not_persist',
-            '_relationships' => [
-                'some_relationship' => [
-                    '_links' => [
-                        'self' => [
-                            'href' => '/some_table/uuid/some_relationship'
-                        ]
-                    ]
-                ],
-                'all' => [
-                    '_links' => [
-                        'self' => [
-                            'href' => '/some_table/uuid/some_relationship'
-                        ]
-                    ]
-                ]
-            ]
+            '_relationships' => []
         ]);
     }
 }

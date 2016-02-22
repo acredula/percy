@@ -43,17 +43,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function countFromRequest(ServerRequestInterface $request, $joins = '', $conditionals = '', $end = '')
+    public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-
-        list($query, $params) = $this->buildQueryFromRules(
-            $rules,
-            'SELECT COUNT(*) as total FROM',
-            $joins,
-            $conditionals,
-            $end
-        );
+        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
@@ -61,16 +54,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getFromRequest(
-        ServerRequestInterface $request,
-        $start        = 'SELECT * FROM',
-        $joins        = '',
-        $conditionals = '',
-        $end          = ''
-    ) {
+    public function getFromRequest(ServerRequestInterface $request)
+    {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
 
-        list($query, $params) = $this->buildQueryFromRules($rules, $start, $joins, $conditionals, $end);
+        list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
@@ -83,8 +71,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $query .= $rules['limit'];
         }
 
+        $query = trim(preg_replace('!\s+!', ' ', $query));
+
         $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
-                           ->setTotal($this->countFromRequest($request, $joins, $conditionals, $end));
+                           ->setTotal($this->countFromRequest($request));
 
         $this->decorate($collection, StoreInterface::ON_READ);
 
@@ -94,31 +84,20 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Build a base query without sorting and limits from filter rules.
      *
-     * @param array       $rules
-     * @param string      $start
-     * @param string      $joins
-     * @param string      $conditionals
-     * @param string      $end
-     * @param string|null $table
+     * @param array  $rules
+     * @param string $start
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start, $joins, $conditionals, $end, $table = null)
+    protected function buildQueryFromRules(array $rules, $start = 'SELECT * FROM ')
     {
-        $table = (is_null($table)) ? $this->getTable() : $table;
-        $query = sprintf(
-            '%s %s %s %s',
-            trim($start),
-            trim($table),
-            trim($joins),
-            trim($conditionals)
-        );
+        $query = $start . $this->getTable();
 
         $params = [];
 
         if (array_key_exists('filter', $rules)) {
             foreach ($rules['filter'] as $key => $where) {
-                $keyword   = ($key === 0 || $conditionals !== '') ? ' WHERE' : ' AND';
+                $keyword   = ($key === 0) ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
                 $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
                 $query    .= sprintf('%s %s %s %s', $keyword, $where['field'], $delimiter, $binding);
@@ -127,18 +106,16 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
         }
 
-        $query .= " {$end}";
-
         return [$query, $params];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function countByField($field, $value)
+    public function countByField($field, $value, ServerRequestInterface $request = null)
     {
         $query = sprintf(
-            'SELECT COUNT(*) as total FROM %s WHERE %s.%s IN (:%s)',
+            "SELECT COUNT(*) as total FROM %s WHERE %s.%s IN (:%s)",
             $this->getTable(),
             $this->getTable(),
             $field,
@@ -155,7 +132,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getByField($field, $value)
+    public function getByField($field, $value, ServerRequestInterface $request = null)
     {
         $query = sprintf(
             'SELECT * FROM %s WHERE %s.%s IN (:%s)',
@@ -164,6 +141,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field,
             $field
         );
+
+        // @todo - allow extra filtering from request
 
         $params = [
             $field => implode(',', (array) $value)
@@ -180,67 +159,107 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getRelationshipsFor(Collection $collection, array $relationships = [])
-    {
-        $relCollection = new Collection;
+    public function attachRelationships(
+        Collection $collection,
+        $include                        = null,
+        ServerRequestInterface $request = null
+    ) {
+        foreach ($this->getRelationshipMap() as $key => $map) {
+            if (is_array($include) && ! in_array($key, $include)) {
+                continue;
+            }
 
-        foreach ($collection->getIterator() as $entity) {
-            $rels = $entity->getRelationships();
-            array_walk($rels, [$this, 'getEntityRelationships'], [
-                'entity'     => $entity,
-                'collection' => $relCollection,
-                'include'    => $relationships
-            ]);
+            $binds = $this->getRelationshipBinds($collection, $key, $map['defined_in']['entity']);
+
+            if (empty($binds)) {
+                continue;
+            }
+
+            $query = sprintf(
+                'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s.%s IN (%s)',
+                $map['defined_in']['table'],
+                $map['target']['table'],
+                $map['target']['table'],
+                $map['target']['primary'],
+                $map['defined_in']['table'],
+                $map['target']['relationship'],
+                $map['defined_in']['table'],
+                $map['defined_in']['primary'],
+                implode(',', $binds)
+            );
+
+            // @todo - extend query with filters
+
+            $result = $this->dbal->fetchAll($query, []);
+
+            $this->attachRelationshipsToCollection($collection, $key, $result);
         }
-
-        return $relCollection;
     }
 
     /**
-     * Attach relationships to a specific entity.
+     * Iterate a result set and attach the relationship to it's correct entity
+     * within a collection.
      *
-     * @param string $entityType
-     * @param string $relationship
-     * @param array  $userData
+     * @param \Percy\Entity\Collection $collection
+     * @param string                   $relationship
+     * @param array                    $data
      *
      * @return void
      */
-    protected function getEntityRelationships($entityType, $relationship, array $userData)
+    protected function attachRelationshipsToCollection(Collection $collection, $relationship, array $data)
     {
-        $collection = $userData['collection'];
-        $include    = $userData['include'];
-        $entity     = $userData['entity'];
-        $map        = $this->getRelationshipMap($relationship);
-
-        if (! in_array($relationship, $include)) {
-            return false;
-        }
-
-        $query = sprintf(
-            'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s = :%s',
-            $map['defined_in']['table'],
-            $map['target']['table'],
-            $map['target']['table'],
-            $map['target']['primary'],
-            $map['defined_in']['table'],
-            $map['target']['relationship'],
-            $map['defined_in']['primary'],
-            $map['defined_in']['entity']
-        );
-
-        $result = $this->dbal->fetchAll($query, [
-            $map['defined_in']['entity'] => $entity[$map['defined_in']['entity']]
-        ]);
+        $map           = $this->getRelationshipMap($relationship);
+        $relationships = array_column($data, $map['defined_in']['primary']);
 
         $remove = [$map['defined_in']['primary'], $map['target']['relationship']];
 
-        foreach ($result as $resource) {
+        foreach ($data as &$resource) {
             $resource = array_filter($resource, function ($key) use ($remove) {
                 return (! in_array($key, $remove));
             }, ARRAY_FILTER_USE_KEY);
-
-            $collection->addEntity((new $entityType)->hydrate($resource));
         }
+
+        foreach ($collection->getIterator() as $entity) {
+            $entityRels = $entity->getRelationshipMap();
+
+            if (! array_key_exists($relationship, $entityRels)) {
+                continue;
+            }
+
+            $keys = array_keys(preg_grep("/{$entity[$map['defined_in']['entity']]}/", $relationships));
+            $rels = array_filter($data, function ($key) use ($keys) {
+                return in_array($key, $keys);
+            }, ARRAY_FILTER_USE_KEY);
+
+            $rels = $this->buildCollection($rels, $entityRels[$relationship])->setTotal(count($rels));
+            $this->decorate($rels, StoreInterface::ON_READ);
+
+            $entity->addRelationship($relationship, $rels);
+        }
+    }
+
+    /**
+     * Return relationship bind conditional.
+     *
+     * @param \Percy\Entity\Collection $collection
+     * @param string                   $relationship
+     * @param string                   $key
+     *
+     * @return string
+     */
+    protected function getRelationshipBinds(Collection $collection, $relationship, $key)
+    {
+        $primaries = [];
+
+        foreach ($collection->getIterator() as $entity) {
+            if (! array_key_exists($relationship, $entity->getRelationshipMap())) {
+                continue;
+            }
+
+            $primaries[] = "'{$entity[$key]}'";
+        }
+
+        return $primaries;
     }
 
     /**
@@ -253,8 +272,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @return array
      */
-    public function getRelationshipMap($relationship)
+    public function getRelationshipMap($relationship = null)
     {
+        if (is_null($relationship)) {
+            return $this->relationships;
+        }
+
         if (! array_key_exists($relationship, $this->relationships)) {
             throw new InvalidArgumentException(
                 sprintf('(%s) is not defined in the relationship map on (%s)', $relationship, get_class($this))

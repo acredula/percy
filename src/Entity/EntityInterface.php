@@ -8,7 +8,7 @@ use Percy\Entity\Decorator\DecoratorInterface;
 interface EntityInterface extends ArrayAccess
 {
     /**
-     * Return api representation of entity with _links.
+     * Return representation of entity with relationships.
      *
      * @param array $scopes
      *
@@ -47,7 +47,24 @@ interface EntityInterface extends ArrayAccess
      *
      * @return array
      */
+    public function getRelationshipMap();
+
+    /**
+     * Return array of relationships.
+     *
+     * @return array
+     */
     public function getRelationships();
+
+    /**
+     * Add a relationship to the entity.
+     *
+     * @param string                   $relationship
+     * @param \Percy\Entity\Collection $collection
+     *
+     * @return self
+     */
+    public function addRelationship($relationship, Collection $collection);
 
     /**
      * Return the decorators for a specific action.

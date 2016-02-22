@@ -21,7 +21,7 @@ class EntityStub extends AbstractEntity implements EntityInterface
         'do_not_persist' => ['persist' => false]
     ];
 
-    protected $relationships = ['some_relationship' => EntityStub::class];
+    protected $relationshipMap = ['some_relationship' => EntityStub::class];
 
     protected $validator = 'Acme\Validator\EntityValidator';
 
