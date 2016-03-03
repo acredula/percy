@@ -61,7 +61,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules) && ! array_key_exists('search', $rules)) {
-            $query .= sprintf(' ORDER BY %s ', $rules['sort']);
+            $query .= sprintf(' ORDER BY %s ', (in_array($rules['sort'], ['rand', 'random'])) ? 'RAND()' : $rules['sort']);
             $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
         }
 
