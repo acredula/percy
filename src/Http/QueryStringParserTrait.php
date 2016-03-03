@@ -53,11 +53,9 @@ trait QueryStringParserTrait
             case 'sort':
                 return $value;
             case 'filter':
-                $filters = $this->parseFilters((array) $value);
-                return (empty($filters)) ? false : $filters;
+                return $this->parseFilters((array) $value);
             case 'search':
-                $search = $this->parseSearch($value);
-                return (empty($search)) ? false : $search;
+                return $this->parseSearch($value);
             case 'minscore':
                 return (float) $value;
             default:
