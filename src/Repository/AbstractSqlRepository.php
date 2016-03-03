@@ -89,8 +89,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     /**
      * Build a base query without sorting and limits from filter rules.
      *
-     * @param array  $rules
-     * @param string $start
+     * @param array   $rules
+     * @param boolean $count
      *
      * @return array
      */

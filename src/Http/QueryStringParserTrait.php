@@ -48,10 +48,8 @@ trait QueryStringParserTrait
             case 'limit':
             case 'offset':
                 return (int) $value;
-            case 'sort_direction':
-                return strtoupper($value);
             case 'sort':
-                return $value;
+                return $this->parseSort($value);
             case 'filter':
                 return $this->parseFilters((array) $value);
             case 'search':
@@ -61,6 +59,19 @@ trait QueryStringParserTrait
             default:
                 return false;
         }
+    }
+
+    /**
+     * Map sorts to a usable format.
+     *
+     * @param string $value
+     *
+     * @return array
+     */
+    protected function parseSort($value)
+    {
+        $map  = [];
+        $sort = explode(',', $value);
     }
 
     /**
