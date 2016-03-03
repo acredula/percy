@@ -76,7 +76,7 @@ trait QueryStringParserTrait
 
         if (count($search) !== 2) {
             throw new InvalidArgumentException(
-                'Malformed query string, search format should be (search=column|term) or (search=column1,column2|term)'
+                'Malformed query string, search format should be (search=field|term) or (search=field1,field2|term)'
             );
         }
 
