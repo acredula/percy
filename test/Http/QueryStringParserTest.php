@@ -27,7 +27,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('something=something');
 
-        $this->assertEquals(['filter' => []], $query);
+        $this->assertEquals([], $query);
     }
 
     /**

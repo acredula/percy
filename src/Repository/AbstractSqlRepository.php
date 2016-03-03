@@ -46,7 +46,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
+        list($query, $params) = $this->buildQueryFromRules($rules, true);
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
@@ -60,9 +60,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         list($query, $params) = $this->buildQueryFromRules($rules);
 
-        if (array_key_exists('sort', $rules)) {
+        if (array_key_exists('sort', $rules) && ! array_key_exists('search', $rules)) {
             $query .= sprintf(' ORDER BY %s ', $rules['sort']);
             $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
+        }
+
+        if (array_key_exists('search', $rules)) {
+            $query .= sprintf(' ORDER BY MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['columns']);
         }
 
         if (array_key_exists('limit', $rules)) {
@@ -73,8 +77,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         $query = trim(preg_replace('!\s+!', ' ', $query));
 
-        $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
-                           ->setTotal($this->countFromRequest($request));
+        $data = $this->dbal->fetchAll($query, $params);
+
+        $collection = $this->buildCollection($data)->setTotal($this->countFromRequest($request));
 
         $this->decorate($collection, StoreInterface::ON_READ);
 
@@ -89,8 +94,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start = 'SELECT * FROM ')
+    protected function buildQueryFromRules(array $rules, $count = false)
     {
+        $start = ($count === false) ? 'SELECT * FROM ' : 'SELECT *, COUNT(*) as total FROM ';
+
         $query = $start . $this->getTable();
 
         $params = [];
@@ -104,6 +111,15 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
                 $params[$where['binding']] = $where['value'];
             }
+        }
+
+        if (array_key_exists('search', $rules)) {
+            $keyword = (array_key_exists('filter', $rules)) ? ' AND' : ' WHERE';
+            $query  .= sprintf('%s MATCH (%s) AGAINST (:match_bind IN BOOLEAN MODE)', $keyword, $rules['search']['columns']);
+            $query  .= sprintf(' HAVING MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['columns']);
+
+            $params['match_bind'] = $rules['search']['term'];
+            $params['score_bind'] = (array_key_exists('minscore', $rules)) ? $rules['minscore'] : 0;
         }
 
         return [$query, $params];

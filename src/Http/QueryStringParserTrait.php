@@ -22,9 +22,7 @@ trait QueryStringParserTrait
 
         parse_str($query, $split);
 
-        $query = [
-            'filter' => []
-        ];
+        $query = [];
 
         while (list($key, $value) = each($split)) {
             $mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value]);
@@ -55,10 +53,39 @@ trait QueryStringParserTrait
             case 'sort':
                 return $value;
             case 'filter':
-                return $this->parseFilters((array) $value);
+                $filters = $this->parseFilters((array) $value);
+                return (empty($filters)) ? false : $filters;
+            case 'search':
+                $search = $this->parseSearch($value);
+                return (empty($search)) ? false : $search;
+            case 'minscore':
+                return (float) $value;
             default:
                 return false;
         }
+    }
+
+    /**
+     * Map search to a usable format.
+     *
+     * @param string $value
+     *
+     * @return array
+     */
+    protected function parseSearch($value)
+    {
+        $search = explode('|', $value);
+
+        if (count($search) !== 2) {
+            throw new InvalidArgumentException(
+                'Malformed query string, search format should be (search=column|term) or (search=column1,column2|term)'
+            );
+        }
+
+        return [
+            'columns' => $search[0],
+            'term'    => $search[1]
+        ];
     }
 
     /**

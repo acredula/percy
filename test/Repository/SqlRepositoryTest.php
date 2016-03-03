@@ -34,7 +34,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         );
 
         $dbal->expects($this->at(1))->method('fetchOne')->with(
-            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1'),
+            $this->equalTo('SELECT *, COUNT(*) as total FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1'),
             $this->equalTo(['field1_0' => 'value1', 'field2_1' => 'value2'])
         )->will(
             $this->returnValue(['total' => 10])
