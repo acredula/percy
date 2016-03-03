@@ -81,8 +81,8 @@ trait QueryStringParserTrait
         }
 
         return [
-            'columns' => $search[0],
-            'term'    => $search[1]
+            'fields' => $search[0],
+            'term'   => $search[1]
         ];
     }
 

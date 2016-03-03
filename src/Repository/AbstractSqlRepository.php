@@ -66,7 +66,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         }
 
         if (array_key_exists('search', $rules)) {
-            $query .= sprintf(' ORDER BY MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['columns']);
+            $query .= sprintf(' ORDER BY MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['fields']);
         }
 
         if (array_key_exists('limit', $rules)) {
