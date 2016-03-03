@@ -61,8 +61,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules) && ! array_key_exists('search', $rules)) {
-            $query .= sprintf(' ORDER BY %s ', (in_array($rules['sort'], ['rand', 'random'])) ? 'RAND()' : $rules['sort']);
-            $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
+            $query .= $this->buildSortPart($rules['sort'], $this->getTable());
         }
 
         if (array_key_exists('search', $rules)) {
@@ -77,13 +76,39 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         $query = trim(preg_replace('!\s+!', ' ', $query));
 
-        $data = $this->dbal->fetchAll($query, $params);
-
-        $collection = $this->buildCollection($data)->setTotal($this->countFromRequest($request));
+        $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
+                           ->setTotal($this->countFromRequest($request));
 
         $this->decorate($collection, StoreInterface::ON_READ);
 
         return $collection;
+    }
+
+    /**
+     * Build the sort part of the query.
+     *
+     * @param array|string $sorts
+     * @param string $table
+     *
+     * @return string
+     */
+    protected function buildSortPart($sorts, $table)
+    {
+        if (is_string($sorts) && $sorts === 'RAND()') {
+            return ' ORDER BY RAND()';
+        }
+
+        $fields = [];
+
+        foreach ($sorts as $sort) {
+            if (substr($sort['field'], 0, strlen($table)) !== $table) {
+                continue;
+            }
+
+            $fields[] = sprintf('%s %s', $sort['field'], strtoupper($sort['direction']));
+        }
+
+        return (empty($fields)) ? '' : sprintf(' ORDER BY %s', implode(', ', $fields));
     }
 
     /**
@@ -184,6 +209,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return;
         }
 
+        $rules = $this->parseQueryString($request->getUri()->getQuery());
+
         foreach ($this->getRelationshipMap() as $key => $map) {
             if (is_array($include) && ! in_array($key, $include)) {
                 continue;
@@ -208,7 +235,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 implode(',', $binds)
             );
 
-            // @todo - extend query with filters
+            if (array_key_exists('sort', $rules)) {
+                $query .= $this->buildSortPart($rules['sort'], $map['target']['table']);
+            }
 
             $result = $this->dbal->fetchAll($query, []);
 

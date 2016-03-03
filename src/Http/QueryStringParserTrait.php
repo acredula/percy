@@ -70,8 +70,24 @@ trait QueryStringParserTrait
      */
     protected function parseSort($value)
     {
-        $map  = [];
-        $sort = explode(',', $value);
+        $map   = [];
+        $sorts = explode(',', $value);
+
+        foreach ($sorts as $sort) {
+            $sort      = explode('|', $sort);
+            $direction = (count($sort) > 1) ? $sort[1] : 'asc';
+
+            if (in_array($sort[0], ['rand', 'random'])) {
+                return 'RAND()';
+            }
+
+            $map[] = [
+                'field'     => $sort[0],
+                'direction' => $direction
+            ];
+        }
+
+        return $map;
     }
 
     /**
