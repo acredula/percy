@@ -107,7 +107,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
             $fields[] = sprintf('%s %s', $sort['field'], strtoupper($sort['direction']));
         }
-var_dump($sorts);
+
         return (empty($fields)) ? '' : sprintf(' ORDER BY %s', implode(', ', $fields));
     }
 
