@@ -98,6 +98,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return ' ORDER BY RAND()';
         }
 
+        if (! is_array($sorts)) {
+            return '';
+        }
+
         $fields = [];
 
         foreach ($sorts as $sort) {
@@ -209,7 +213,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return;
         }
 
-        $rules = $this->parseQueryString($request->getUri()->getQuery());
+        $rules = ($request instanceof ServerRequestInterface)
+               ? $this->parseQueryString($request->getUri()->getQuery())
+               : [];
 
         foreach ($this->getRelationshipMap() as $key => $map) {
             if (is_array($include) && ! in_array($key, $include)) {
