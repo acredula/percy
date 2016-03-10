@@ -27,7 +27,7 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
 
         $query = $sanitiser->parseQueryString('something=something');
 
-        $this->assertEquals(['filter' => []], $query);
+        $this->assertEquals([], $query);
     }
 
     /**
@@ -37,10 +37,15 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter=field|=|value');
+        $query = $sanitiser->parseQueryString('sort=table.something|desc&filter=field|=|value');
 
         $this->assertEquals([
-            'sort'   => 'something',
+            'sort'   => [
+                [
+                    'field'     => 'table.something',
+                    'direction' => 'desc'
+                ]
+            ],
             'filter' => [
                 [
                     'field'     => 'field',
@@ -59,10 +64,15 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter[]=field|=|value&filter[]=field2|<|value2');
+        $query = $sanitiser->parseQueryString('sort=table.something|desc&filter[]=field|=|value&filter[]=field2|<|value2');
 
         $this->assertEquals([
-            'sort'   => 'something',
+            'sort'   => [
+                [
+                    'field'     => 'table.something',
+                    'direction' => 'desc'
+                ]
+            ],
             'filter' => [
                 [
                     'field'     => 'field',
@@ -87,10 +97,9 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|in|tomato,bbq');
+        $query = $sanitiser->parseQueryString('filter[]=sauces|in|tomato,bbq');
 
         $this->assertEquals([
-            'sort'   => 'something',
             'filter' => [
                 [
                     'field'     => 'sauces',
@@ -109,10 +118,9 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|not in|tomato,bbq');
+        $query = $sanitiser->parseQueryString('filter[]=sauces|not in|tomato,bbq');
 
         $this->assertEquals([
-            'sort'   => 'something',
             'filter' => [
                 [
                     'field'     => 'sauces',
@@ -131,10 +139,9 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|like|%sauce');
+        $query = $sanitiser->parseQueryString('filter[]=sauces|like|%sauce');
 
         $this->assertEquals([
-            'sort'   => 'something',
             'filter' => [
                 [
                     'field'     => 'sauces',
@@ -153,10 +160,9 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     {
         $sanitiser = new QueryStringParserTraitStub;
 
-        $query = $sanitiser->parseQueryString('sort=something&filter[]=sauces|not like|soy%');
+        $query = $sanitiser->parseQueryString('filter[]=sauces|not like|soy%');
 
         $this->assertEquals([
-            'sort'   => 'something',
             'filter' => [
                 [
                     'field'     => 'sauces',

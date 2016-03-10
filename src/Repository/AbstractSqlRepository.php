@@ -46,7 +46,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     public function countFromRequest(ServerRequestInterface $request)
     {
         $rules = $this->parseQueryString($request->getUri()->getQuery());
-        list($query, $params) = $this->buildQueryFromRules($rules, 'SELECT COUNT(*) as total FROM ');
+        list($query, $params) = $this->buildQueryFromRules($rules, true);
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
     }
@@ -60,9 +60,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         list($query, $params) = $this->buildQueryFromRules($rules);
 
-        if (array_key_exists('sort', $rules)) {
-            $query .= sprintf(' ORDER BY %s ', $rules['sort']);
-            $query .= (array_key_exists('sort_direction', $rules)) ? $rules['sort_direction'] : 'ASC';
+        if (array_key_exists('sort', $rules) && ! array_key_exists('search', $rules)) {
+            $query .= $this->buildSortPart($rules['sort'], $this->getTable());
+        }
+
+        if (array_key_exists('search', $rules)) {
+            $query .= sprintf(' ORDER BY MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['fields']);
         }
 
         if (array_key_exists('limit', $rules)) {
@@ -82,15 +85,44 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     }
 
     /**
+     * Build the sort part of the query.
+     *
+     * @param array|string $sorts
+     * @param string $table
+     *
+     * @return string
+     */
+    protected function buildSortPart($sorts, $table)
+    {
+        if (is_string($sorts) && $sorts === 'RAND()') {
+            return ' ORDER BY RAND()';
+        }
+
+        $fields = [];
+
+        foreach ($sorts as $sort) {
+            if (substr($sort['field'], 0, strlen($table)) !== $table) {
+                continue;
+            }
+
+            $fields[] = sprintf('%s %s', $sort['field'], strtoupper($sort['direction']));
+        }
+
+        return (empty($fields)) ? '' : sprintf(' ORDER BY %s', implode(', ', $fields));
+    }
+
+    /**
      * Build a base query without sorting and limits from filter rules.
      *
-     * @param array  $rules
-     * @param string $start
+     * @param array   $rules
+     * @param boolean $count
      *
      * @return array
      */
-    protected function buildQueryFromRules(array $rules, $start = 'SELECT * FROM ')
+    protected function buildQueryFromRules(array $rules, $count = false)
     {
+        $start = ($count === false) ? 'SELECT * FROM ' : 'SELECT *, COUNT(*) as total FROM ';
+
         $query = $start . $this->getTable();
 
         $params = [];
@@ -104,6 +136,15 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
                 $params[$where['binding']] = $where['value'];
             }
+        }
+
+        if (array_key_exists('search', $rules)) {
+            $keyword = (array_key_exists('filter', $rules)) ? ' AND' : ' WHERE';
+            $query  .= sprintf('%s MATCH (%s) AGAINST (:match_bind IN BOOLEAN MODE)', $keyword, $rules['search']['columns']);
+            $query  .= sprintf(' HAVING MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['columns']);
+
+            $params['match_bind'] = $rules['search']['term'];
+            $params['score_bind'] = (array_key_exists('minscore', $rules)) ? $rules['minscore'] : 0;
         }
 
         return [$query, $params];
@@ -168,6 +209,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return;
         }
 
+        $rules = $this->parseQueryString($request->getUri()->getQuery());
+
         foreach ($this->getRelationshipMap() as $key => $map) {
             if (is_array($include) && ! in_array($key, $include)) {
                 continue;
@@ -192,7 +235,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 implode(',', $binds)
             );
 
-            // @todo - extend query with filters
+            if (array_key_exists('sort', $rules)) {
+                $query .= $this->buildSortPart($rules['sort'], $map['target']['table']);
+            }
 
             $result = $this->dbal->fetchAll($query, []);
 
