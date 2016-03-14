@@ -3,6 +3,7 @@
 namespace Percy\Test\Entity;
 
 use Percy\Entity\Collection;
+use Percy\Entity\EntityInterface;
 
 class CollectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -18,7 +19,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             $data = ['entity' => $i];
             $arrayCollection[] = $data;
 
-            $entity = $this->getMock('Percy\Entity\EntityInterface');
+            $entity = $this->getMock(EntityInterface::class);
             $entity->expects($this->any())->method('getDataSource')->will($this->returnValue('test'));
             $entity->expects($this->exactly(2))->method('getData')->will($this->returnValue($data));
             $entity->expects($this->exactly(1))->method('toArray')->will($this->returnValue($data));

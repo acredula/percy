@@ -91,6 +91,38 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Asserts that the sanitiser maps a random order sort.
+     */
+    public function testSanitiserMapsRandomSort()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('sort=random');
+
+        $this->assertEquals([
+            'sort' => 'RAND()'
+        ], $query);
+    }
+
+    /**
+     * Asserts that the sanitiser maps search.
+     */
+    public function testSanitiserMapsSearch()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('search=col|term&minscore=1.0');
+
+        $this->assertEquals([
+            'search' => [
+                'fields' => 'col',
+                'term'   => 'term'
+            ],
+            'minscore' => 1.0
+        ], $query);
+    }
+
+    /**
      * Asserts that the sanitiser maps in filters.
      */
     public function testSanitiserMapsInFilters()
@@ -196,5 +228,17 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
         $sanitiser = new QueryStringParserTraitStub;
 
         $query = $sanitiser->parseQueryString('filter=field|has|value');
+    }
+
+    /**
+     * Asserts that the sanitiser throws an exception when incorrectly formatted search.
+     */
+    public function testInvalidSearchThrowsException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('search=field');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Percy\Test\Entity;
 
+use Percy\Entity\Collection;
 use Percy\Test\Asset\EntityStub;
 use Percy\Test\Asset\EmptyEntityStub;
 
@@ -136,7 +137,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testEntityCanAddRelationship()
     {
-        $collection = $this->getMock('Percy\Entity\Collection');
+        $collection = $this->getMock(Collection::class);
 
         $entity = new EntityStub;
 

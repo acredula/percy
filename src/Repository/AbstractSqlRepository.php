@@ -144,8 +144,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
         if (array_key_exists('search', $rules)) {
             $keyword = (array_key_exists('filter', $rules)) ? ' AND' : ' WHERE';
-            $query  .= sprintf('%s MATCH (%s) AGAINST (:match_bind IN BOOLEAN MODE)', $keyword, $rules['search']['columns']);
-            $query  .= sprintf(' HAVING MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['columns']);
+            $query  .= sprintf('%s MATCH (%s) AGAINST (:match_bind IN BOOLEAN MODE)', $keyword, $rules['search']['fields']);
+            $query  .= sprintf(' HAVING MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['fields']);
 
             $params['match_bind'] = $rules['search']['term'];
             $params['score_bind'] = (array_key_exists('minscore', $rules)) ? $rules['minscore'] : 0;
