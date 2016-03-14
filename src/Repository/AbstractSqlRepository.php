@@ -64,14 +64,14 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $query .= $this->buildSortPart($rules['sort'], $this->getTable());
         }
 
-        if (array_key_exists('search', $rules)) {
+        if (array_key_exists('search', $rules) && $this->acceptableField($rules['search']['fields'])) {
             $query .= sprintf(' ORDER BY MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['fields']);
         }
 
         if (array_key_exists('limit', $rules)) {
             $query .= ' LIMIT ';
             $query .= (array_key_exists('offset', $rules)) ? sprintf('%d,', $rules['offset']) : '';
-            $query .= $rules['limit'];
+            $query .= sprintf('%d', $rules['limit']);
         }
 
         $query = trim(preg_replace('!\s+!', ' ', $query));
@@ -126,13 +126,14 @@ abstract class AbstractSqlRepository implements RepositoryInterface
     protected function buildQueryFromRules(array $rules, $count = false)
     {
         $start = ($count === false) ? 'SELECT * FROM ' : 'SELECT *, COUNT(*) as total FROM ';
-
         $query = $start . $this->getTable();
 
         $params = [];
 
         if (array_key_exists('filter', $rules)) {
             foreach ($rules['filter'] as $key => $where) {
+                $this->acceptableField($where['field']);
+
                 $keyword   = ($key === 0) ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
                 $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
@@ -142,7 +143,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
         }
 
-        if (array_key_exists('search', $rules)) {
+        if (array_key_exists('search', $rules) && $this->acceptableField($rules['search']['fields'])) {
             $keyword = (array_key_exists('filter', $rules)) ? ' AND' : ' WHERE';
             $query  .= sprintf('%s MATCH (%s) AGAINST (:match_bind IN BOOLEAN MODE)', $keyword, $rules['search']['fields']);
             $query  .= sprintf(' HAVING MATCH (%s) AGAINST (:match_bind) > :score_bind', $rules['search']['fields']);
@@ -152,6 +153,29 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         }
 
         return [$query, $params];
+    }
+
+    /**
+     * Asserts that a field is acceptable to filter on.
+     *
+     * @param string $name
+     *
+     * @return boolean
+     */
+    protected function acceptableField($name)
+    {
+        $entity = $this->getEntityType();
+        $entity = new $entity;
+
+        foreach (explode(',', $name) as $field) {
+            if (! array_key_exists($name, $entity->getMapping())) {
+                throw new InvalidArgumentException(
+                    sprintf('(%s) is not a whitelisted field to filter, search or sort by', $name)
+                );
+            }
+        }
+
+        return true;
     }
 
     /**
