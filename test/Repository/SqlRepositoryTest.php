@@ -19,15 +19,15 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     protected $queryToQuery = [
         [
-            'query_string' => 'sort=some_table.something|desc&filter[]=field1|=|value1&filter[]=field2|<>|value2&limit=50&offset=0',
-            'data_query'   => 'SELECT * FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1 ORDER BY some_table.something DESC LIMIT 0,50',
-            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE field1 = :field1_0 AND field2 <> :field2_1',
-            'binds'        => ['field1_0' => 'value1', 'field2_1' => 'value2']
+            'query_string' => 'sort=some_table.something|desc&filter[]=some_field|=|value1&filter[]=another_field|<>|value2&limit=50&offset=0',
+            'data_query'   => 'SELECT * FROM some_table WHERE some_field = :some_field_0 AND another_field <> :another_field_1 ORDER BY some_table.something DESC LIMIT 0,50',
+            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE some_field = :some_field_0 AND another_field <> :another_field_1',
+            'binds'        => ['some_field_0' => 'value1', 'another_field_1' => 'value2']
         ],
         [
-            'query_string' => 'search=field|term&minscore=1.0',
-            'data_query'   => 'SELECT * FROM some_table WHERE MATCH (field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (field) AGAINST (:match_bind) > :score_bind ORDER BY MATCH (field) AGAINST (:match_bind) > :score_bind',
-            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE MATCH (field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (field) AGAINST (:match_bind) > :score_bind',
+            'query_string' => 'search=some_field|term&minscore=1.0',
+            'data_query'   => 'SELECT * FROM some_table WHERE MATCH (some_field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (some_field) AGAINST (:match_bind) > :score_bind ORDER BY MATCH (some_field) AGAINST (:match_bind) > :score_bind',
+            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE MATCH (some_field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (some_field) AGAINST (:match_bind) > :score_bind',
             'binds'        => ['match_bind' => 'term', 'score_bind' => 1.0]
         ],
         [
@@ -108,7 +108,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $collection = (new SqlRepositoryStub($dbal))->getByField('field', ['value1', 'value2']);
 
-        $this->assertInstanceOf('Percy\Entity\Collection', $collection);
+        $this->assertInstanceOf(Collection::class, $collection);
         $this->assertCount(2, $collection);
         $this->assertSame(10, $collection->getTotal());
     }
