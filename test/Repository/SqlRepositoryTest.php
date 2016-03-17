@@ -3,6 +3,7 @@
 namespace Percy\Test\Repository;
 
 use Aura\Sql\ExtendedPdoInterface;
+use InvalidArgumentException;
 use Percy\Entity\Collection;
 use Percy\Test\Asset\EntityStub;
 use Percy\Test\Asset\SqlRepositoryIncompleteMapStub;
@@ -19,8 +20,8 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     protected $queryToQuery = [
         [
-            'query_string' => 'sort=some_table.something|desc&filter[]=some_field|=|value1&filter[]=another_field|<>|value2&limit=50&offset=0',
-            'data_query'   => 'SELECT * FROM some_table WHERE some_field = :some_field_0 AND another_field <> :another_field_1 ORDER BY some_table.something DESC LIMIT 0,50',
+            'query_string' => 'sort=some_table.some_field|desc&filter[]=some_field|=|value1&filter[]=another_field|<>|value2&limit=50&offset=0',
+            'data_query'   => 'SELECT * FROM some_table WHERE some_field = :some_field_0 AND another_field <> :another_field_1 ORDER BY some_table.some_field DESC LIMIT 0,50',
             'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE some_field = :some_field_0 AND another_field <> :another_field_1',
             'binds'        => ['some_field_0' => 'value1', 'another_field_1' => 'value2']
         ],
@@ -33,12 +34,6 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         [
             'query_string' => 'sort=rand',
             'data_query'   => 'SELECT * FROM some_table ORDER BY RAND()',
-            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table',
-            'binds'        => []
-        ],
-        [
-            'query_string' => 'sort=ignored_table.col|asc',
-            'data_query'   => 'SELECT * FROM some_table',
             'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table',
             'binds'        => []
         ]
@@ -111,5 +106,46 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertCount(2, $collection);
         $this->assertSame(10, $collection->getTotal());
+    }
+
+    /**
+     * Asserts that an exception is thrown when trying to filter on non white listed fields.
+     */
+    public function testSqlRepositoryThrowsExceptionWithInvalidFields()
+    {
+        $exceptions = [];
+
+        $queries = [
+            'search=a_field|term&minscore=1.0',
+            'filter=a_field|=|something',
+            'filter=a_field;drop table something;|=|something',
+            'sort=some_table.;drop table something;',
+            'sort=what.what,;drop table something;',
+            'sort=;drop table something;',
+            'sort=what.what'
+        ];
+
+        foreach ($queries as $query) {
+            try {
+                $uri     = $this->getMock(UriInterface::class);
+                $request = $this->getMock(ServerRequestInterface::class);
+                $dbal    = $this->getMock(ExtendedPdoInterface::class);
+
+                $uri->expects($this->once())->method('getQuery')->will($this->returnValue($query));
+                $request->expects($this->once())->method('getUri')->will($this->returnValue($uri));
+
+                (new SqlRepositoryStub($dbal))->getFromRequest($request);
+            } catch (InvalidArgumentException $e) {
+                $exceptions[] = $e;
+            }
+        }
+
+        // ensure an exception was thrown for every test case
+        $this->assertCount(count($queries), $exceptions);
+
+        // ensure correct instance exception
+        foreach ($exceptions as $exception) {
+            $this->assertInstanceOf(InvalidArgumentException::class, $exception);
+        }
     }
 }

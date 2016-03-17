@@ -61,7 +61,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         list($query, $params) = $this->buildQueryFromRules($rules);
 
         if (array_key_exists('sort', $rules) && ! array_key_exists('search', $rules)) {
-            $query .= $this->buildSortPart($rules['sort'], $this->getTable());
+            $entity    = $this->getEntityType();
+            $entity    = new $entity;
+            $mapping   = $entity->getMapping();
+            $whitelist = array_keys($mapping);
+
+            $query .= $this->buildSortPart($rules['sort'], $this->getTable(), $whitelist);
         }
 
         if (array_key_exists('search', $rules) && $this->acceptableField($rules['search']['fields'])) {
@@ -88,11 +93,12 @@ abstract class AbstractSqlRepository implements RepositoryInterface
      * Build the sort part of the query.
      *
      * @param array|string $sorts
-     * @param string $table
+     * @param string       $table
+     * @param array        $whitelist
      *
      * @return string
      */
-    protected function buildSortPart($sorts, $table)
+    protected function buildSortPart($sorts, $table, array $whitelist)
     {
         if (is_string($sorts) && $sorts === 'RAND()') {
             return ' ORDER BY RAND()';
@@ -105,8 +111,26 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $fields = [];
 
         foreach ($sorts as $sort) {
-            if (substr($sort['field'], 0, strlen($table)) !== $table) {
+            $field = explode('.', $sort['field']);
+
+            if (count($field) !== 2) {
+                throw new InvalidArgumentException('Sort paramater is formatted incorrectly');
+            }
+
+            if ($field[0] !== $table && count($sorts) > 1) {
                 continue;
+            }
+
+            if ($field[0] !== $table && count($sorts) < 2) {
+                throw new InvalidArgumentException(
+                    sprintf('(%s) is not a whitelisted field to sort by', $sort['field'])
+                );
+            }
+
+            if (! in_array($field[1], $whitelist)) {
+                throw new InvalidArgumentException(
+                    sprintf('(%s) is not a whitelisted field to sort by', $sort['field'])
+                );
             }
 
             $fields[] = sprintf('%s %s', $sort['field'], strtoupper($sort['direction']));
@@ -237,6 +261,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             return;
         }
 
+        $rels = $collection->getIterator()->current()->getRelationshipMap();
+
         $rules = ($request instanceof ServerRequestInterface)
                ? $this->parseQueryString($request->getUri()->getQuery())
                : [];
@@ -265,8 +291,19 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 implode(',', $binds)
             );
 
+            // @todo allow for further filtering of rels via request
+
             if (array_key_exists('sort', $rules)) {
-                $query .= $this->buildSortPart($rules['sort'], $map['target']['table']);
+                $whitelist = [];
+
+                if (array_key_exists($key, $rels)) {
+                    $entity    = $rels[$key];
+                    $entity    = new $entity;
+                    $mapping   = $entity->getMapping();
+                    $whitelist = array_keys($mapping);
+                }
+
+                $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
             }
 
             $result = $this->dbal->fetchAll($query, []);
