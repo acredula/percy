@@ -110,6 +110,9 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Asserts that an exception is thrown when trying to filter on non white listed fields.
+     *
+     * The idea here is that it covers all user input, values are not covered by this as they
+     * are parameter bound.
      */
     public function testSqlRepositoryThrowsExceptionWithInvalidFields()
     {
@@ -117,7 +120,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $queries = [
             'search=a_field|term&minscore=1.0',
-            'filter=a_field|=|something',
+            'filter=some_field|;drop table users;|something',
             'filter=a_field;drop table something;|=|something',
             'sort=some_table.;drop table something;',
             'sort=what.what,;drop table something;',
