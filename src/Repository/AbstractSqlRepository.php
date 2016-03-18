@@ -216,7 +216,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         );
 
         $params = [
-            $field => implode(',', (array) $value)
+            $field => $value
         ];
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
@@ -238,7 +238,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         // @todo - allow extra filtering from request
 
         $params = [
-            $field => implode(',', (array) $value)
+            $field => $value
         ];
 
         $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))
