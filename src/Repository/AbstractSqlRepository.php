@@ -261,6 +261,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $include                        = null,
         ServerRequestInterface $request = null
     ) {
+        if (count($collection) === 0) {
+            return;
+        }
+        
         if (is_null($include)) {
             return;
         }
