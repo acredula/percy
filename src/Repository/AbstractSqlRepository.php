@@ -120,7 +120,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             if ($field[0] !== $table && count($sorts) > 1) {
                 continue;
             }
-
+            
+            if ($field[0] !== $table && count($sorts) < 2 && $field[0] === $this->getTable()) {
+                continue;
+            }
+            
             if ($field[0] !== $table && count($sorts) < 2) {
                 throw new InvalidArgumentException(
                     sprintf('(%s) is not a whitelisted field to sort by', $sort['field'])
@@ -216,7 +220,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         );
 
         $params = [
-            $field => implode(',', (array) $value)
+            $field => $value
         ];
 
         return (int) $this->dbal->fetchOne($query, $params)['total'];
@@ -238,7 +242,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         // @todo - allow extra filtering from request
 
         $params = [
-            $field => implode(',', (array) $value)
+            $field => $value
         ];
 
         $collection = $this->buildCollection($this->dbal->fetchAll($query, $params))

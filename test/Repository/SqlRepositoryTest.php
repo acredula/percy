@@ -101,7 +101,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
             $this->returnValue(['total' => 10])
         );
 
-        $collection = (new SqlRepositoryStub($dbal))->getByField('field', ['value1', 'value2']);
+        $collection = (new SqlRepositoryStub($dbal))->getByField('field', 'value1,value2');
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertCount(2, $collection);
