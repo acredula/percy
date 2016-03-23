@@ -59,7 +59,11 @@ abstract class AbstractEntity implements EntityInterface
         ];
 
         foreach ($this->getRelationships() as $key => $value) {
-            $data['_relationships'][$key] = $value->toArray($scopes);
+            try {
+                $data['_relationships'][$key] = $value->toArray($scopes);
+            } catch (ScopeException $e) {
+                continue;
+            }
         }
 
         return array_merge($this->getData($scopes, false), $data);
