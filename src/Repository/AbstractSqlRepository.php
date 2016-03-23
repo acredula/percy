@@ -120,7 +120,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             if ($field[0] !== $table && count($sorts) > 1) {
                 continue;
             }
-
+            
+            if ($field[0] !== $table && count($sorts) < 2 && $field[0] !== $this->getTable()) {
+                continue;
+            }
+            
             if ($field[0] !== $table && count($sorts) < 2) {
                 throw new InvalidArgumentException(
                     sprintf('(%s) is not a whitelisted field to sort by', $sort['field'])
