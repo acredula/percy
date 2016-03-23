@@ -4,6 +4,7 @@ namespace Percy\Entity;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Percy\Exception\ScopeException;
 use Percy\Store\StoreInterface;
 
 abstract class AbstractEntity implements EntityInterface
@@ -39,6 +40,16 @@ abstract class AbstractEntity implements EntityInterface
     protected $validator;
 
     /**
+     * @var string
+     */
+    protected $readScope;
+
+    /**
+     * @var string
+     */
+    protected $writeScope;
+
+    /**
      * {@inheritdoc}
      */
     public function toArray(array $scopes = [])
@@ -57,18 +68,32 @@ abstract class AbstractEntity implements EntityInterface
     /**
      * {@inheritdoc}
      */
-    public function getData(array $scopes = [], $toPersist = true)
+    public function getData(array $scopes = [], $toPersist = false)
     {
-        // @todo filter by scopes
+        if (! is_null($this->getReadScope()) && ! in_array($this->getReadScope(), $scopes)) {
+            throw new ScopeException(sprintf(
+                '(%s) scope needed to read (%s) resource', $this->getReadScope(), get_called_class()
+            ));
+        }
 
-        if ($toPersist === false) {
-            return $this->data;
+        if (! is_null($this->getWriteScope()) && ! in_array($this->getWriteScope(), $scopes) && $toPersist === true) {
+            throw new ScopeException(sprintf(
+                '(%s) scope needed to write (%s) resource', $this->getReadScope(), get_called_class()
+            ));
         }
 
         $data = [];
 
         foreach ($this->mapping as $prop => $options) {
-            if (array_key_exists('persist', $options) && $options['persist'] === false) {
+            if (array_key_exists('persist', $options) && $options['persist'] === false && $toPersist === true) {
+                continue;
+            }
+
+            if (array_key_exists('read', $options) && ! in_array($options['read'], $scopes)) {
+                continue;
+            }
+
+            if (array_key_exists('write', $options) && ! in_array($options['write'], $scopes) && $toPersist === true) {
                 continue;
             }
 
@@ -199,5 +224,21 @@ abstract class AbstractEntity implements EntityInterface
     public function offsetUnset($offset)
     {
         unset($this->data[$offset]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getReadScope()
+    {
+        return $this->readScope;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getWriteScope()
+    {
+        return $this->writeScope;
     }
 }

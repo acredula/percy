@@ -41,21 +41,22 @@ class SqlStore extends AbstractStore
     {
         $this->decorate($collection, StoreInterface::ON_CREATE);
         $this->validate($collection);
-        return $this->collectionIterator($collection, 'insertEntity');
+        return $this->collectionIterator($collection, 'insertEntity', $scopes);
     }
 
     /**
      * Insert an entity to the database.
      *
      * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $scopes
      *
      * @return void
      */
-    protected function insertEntity(EntityInterface $entity)
+    protected function insertEntity(EntityInterface $entity, array $scopes = [])
     {
         $insert = $this->query->newInsert();
         $insert->into($entity->getDataSource());
-        $insert->cols($entity->getData([]));
+        $insert->cols($entity->getData($scopes, true));
 
         $this->dbal->perform($insert->getStatement(), $insert->getBindValues());
     }
@@ -76,21 +77,22 @@ class SqlStore extends AbstractStore
     {
         $this->decorate($collection, StoreInterface::ON_UPDATE);
         $this->validate($collection);
-        return $this->collectionIterator($collection, 'updateEntity');
+        return $this->collectionIterator($collection, 'updateEntity', $scopes);
     }
 
     /**
      * Update an entity in the database.
      *
      * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $scopes
      *
      * @return void
      */
-    protected function updateEntity(EntityInterface $entity)
+    protected function updateEntity(EntityInterface $entity, array $scopes = [])
     {
         $update = $this->query->newUpdate();
         $update->table($entity->getDataSource());
-        $update->cols($entity->getData([]));
+        $update->cols($entity->getData($scopes, true));
         $update->where(sprintf('%s = ?', $entity->getPrimary()), $entity[$entity->getPrimary()]);
 
         $this->dbal->perform($update->getStatement(), $update->getBindValues());
@@ -102,7 +104,7 @@ class SqlStore extends AbstractStore
     public function delete(Collection $collection, array $scopes = [])
     {
         $this->decorate($collection, StoreInterface::ON_DELETE);
-        return $this->collectionIterator($collection, 'deleteEntity');
+        return $this->collectionIterator($collection, 'deleteEntity', $scopes);
     }
 
     /**
@@ -110,11 +112,15 @@ class SqlStore extends AbstractStore
      * To handle soft deletes, extend this class and overload this method.
      *
      * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $scopes
      *
      * @return void
      */
-    protected function deleteEntity(EntityInterface $entity)
+    protected function deleteEntity(EntityInterface $entity, array $scopes = [])
     {
+        // ensure write scopes
+        $entity->getData($scopes, true);
+
         $delete = $this->query->newDelete();
         $delete->from($entity->getDataSource());
         $delete->where(sprintf('%s = ?', $entity->getPrimary()), $entity[$entity->getPrimary()]);
@@ -130,13 +136,13 @@ class SqlStore extends AbstractStore
      *
      * @return boolean
      */
-    protected function collectionIterator(Collection $collection, $callable)
+    protected function collectionIterator(Collection $collection, $callable, array $scopes = [])
     {
         $this->dbal->beginTransaction();
 
         try {
             foreach ($collection->getIterator() as $entity) {
-                call_user_func_array([$this, $callable], [$entity]);
+                call_user_func_array([$this, $callable], [$entity, $scopes]);
             }
         } catch (PDOException $e) {
             $this->dbal->rollBack();
@@ -146,7 +152,7 @@ class SqlStore extends AbstractStore
         $this->dbal->commit();
         return true;
     }
-    
+
     /**
      * Persist relationships to data store.
      *

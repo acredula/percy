@@ -104,4 +104,18 @@ interface EntityInterface extends ArrayAccess
      * @return self
      */
     public function hydrate(array $data);
+
+    /**
+     * Return read scope for the entity.
+     *
+     * @return string
+     */
+    public function getReadScope();
+
+    /**
+     * Return read scope for the entity.
+     *
+     * @return string
+     */
+    public function getWriteScope();
 }
