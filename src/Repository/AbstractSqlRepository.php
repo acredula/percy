@@ -279,7 +279,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             }
 
             $query = sprintf(
-                'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s.%s IN (%s)',
+                'SELECT * FROM %s LEFT JOIN %s ON %s.%s = %s.%s WHERE %s.%s IN (:relationships)',
                 $map['defined_in']['table'],
                 $map['target']['table'],
                 $map['target']['table'],
@@ -287,8 +287,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $map['defined_in']['table'],
                 $map['target']['relationship'],
                 $map['defined_in']['table'],
-                $map['defined_in']['primary'],
-                implode(',', $binds)
+                $map['defined_in']['primary']
             );
 
             // @todo allow for further filtering of rels via request
@@ -306,7 +305,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
             }
 
-            $result = $this->dbal->fetchAll($query, []);
+            $result = $this->dbal->fetchAll($query, ['relationships' => $binds]);
 
             $this->attachRelationshipsToCollection($collection, $key, $result);
         }
@@ -372,7 +371,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 continue;
             }
 
-            $primaries[] = "'{$entity[$key]}'";
+            $primaries[] = $entity[$key];
         }
 
         return $primaries;

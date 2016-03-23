@@ -151,4 +151,24 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
             $this->assertInstanceOf(InvalidArgumentException::class, $exception);
         }
     }
+
+    /**
+     * Asserts that nothing is done when attached relationships is invoked with no includes.
+     */
+    public function testAttachRelationshipsIsSkippedWhenNoIncludesRequested()
+    {
+        $collection = $this->getMock(Collection::class);
+        $dbal       = $this->getMock(ExtendedPdoInterface::class);
+        $repository = new SqlRepositoryStub($dbal);
+
+        $this->assertNull($repository->attachRelationships($collection));
+    }
+
+    /**
+     * Asserts that the attach relationships method builds correct query.
+     */
+    public function testAttachRelationshipsBuildsCorrectQuery()
+    {
+
+    }
 }

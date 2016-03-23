@@ -1,6 +1,6 @@
 {
     "name": "acredula/percy",
-    "description": "Repository, Storage and DataMapper abstraction to aid in the building of RESTful APIs.",
+    "description": "Repository, Storage and DataMapper abstraction to aid in the building of Web Applications and RESTful APIs.",
     "keywords": [
         "acredula",
         "data",
