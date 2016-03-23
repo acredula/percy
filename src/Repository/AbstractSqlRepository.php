@@ -121,7 +121,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 continue;
             }
             
-            if ($field[0] !== $table && count($sorts) < 2 && $field[0] !== $this->getTable()) {
+            if ($field[0] !== $table && count($sorts) < 2 && $field[0] === $this->getTable()) {
                 continue;
             }
             
