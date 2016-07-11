@@ -205,7 +205,7 @@ abstract class AbstractEntity implements EntityInterface
      */
     public function offsetGet($offset)
     {
-        if (isset($this->data[$offset])) {
+        if (array_key_exists($offset, $this->data)) {
             return $this->data[$offset];
         }
 
