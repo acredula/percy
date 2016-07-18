@@ -120,11 +120,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             if ($field[0] !== $table && count($sorts) > 1) {
                 continue;
             }
-            
+
             if ($field[0] !== $table && count($sorts) < 2 && $field[0] === $this->getTable()) {
                 continue;
             }
-            
+
             if ($field[0] !== $table && count($sorts) < 2) {
                 throw new InvalidArgumentException(
                     sprintf('(%s) is not a whitelisted field to sort by', $sort['field'])
@@ -161,21 +161,43 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         if (array_key_exists('filter', $rules)) {
             foreach ($rules['filter'] as $key => $where) {
                 $this->acceptableField($where['field']);
-                
+
                 $isNull = ($where['value'] === 'null') ? true : false;
 
                 $keyword   = ($key === 0) ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
                 $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
-                
+
                 if ($isNull === true) {
-                    $delimiter = ($delimiter === '=') ? 'is' : 'is not';
+                    $delimiter = ($delimiter === '=') ? 'IS' : 'IS NOT';
                     $binding   = 'null';
                 }
-                
+
                 $query .= sprintf('%s %s %s %s', $keyword, $where['field'], $delimiter, $binding);
 
                 $params[$where['binding']] = $where['value'];
+            }
+        }
+
+        if (array_key_exists('has', $rules)) {
+            $keyword = (array_key_exists('filter', $rules)) ? ' AND' : ' WHERE';
+
+            foreach ($rules['has'] as $has) {
+                $relationship = $this->getRelationshipMap($has);
+
+                $query .= sprintf(
+                    '%s (SELECT COUNT(%s.%s) FROM %s WHERE %s.%s = %s.%s) > 0',
+                    $keyword,
+                    $relationship['defined_in']['table'],
+                    $relationship['defined_in']['primary'],
+                    $relationship['defined_in']['table'],
+                    $relationship['defined_in']['table'],
+                    $relationship['defined_in']['primary'],
+                    $this->getTable(),
+                    $relationship['defined_in']['entity']
+                );
+
+                $keyword = ' AND';
             }
         }
 
@@ -272,7 +294,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         if (count($collection) === 0) {
             return;
         }
-        
+
         if (is_null($include)) {
             return;
         }
