@@ -52,6 +52,8 @@ trait QueryStringParserTrait
                 return $this->parseSort($value);
             case 'filter':
                 return $this->parseFilters((array) $value);
+            case 'has':
+                return explode(',', $value);
             case 'search':
                 return $this->parseSearch($value);
             case 'minscore':
