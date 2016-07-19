@@ -166,7 +166,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
                 $keyword   = ($key === 0) ? ' WHERE' : ' AND';
                 $delimiter = strtoupper($where['delimiter']);
-                $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? sprintf('(:%s)', $where['binding']) : ':' . $where['binding'];
+                $binding   = (in_array($delimiter, ['IN', 'NOT IN'])) ? '(' . $this->dbal->quote(explode(',', $where['value'])) . ')' : ':' . $where['binding'];
 
                 if ($isNull === true) {
                     $delimiter = ($delimiter === '=') ? 'IS' : 'IS NOT';
@@ -175,7 +175,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
                 $query .= sprintf('%s %s %s %s', $keyword, $where['field'], $delimiter, $binding);
 
-                $params[$where['binding']] = $where['value'];
+                if (! in_array($delimiter, ['IN', 'NOT IN'])) {
+                    $params[$where['binding']] = $where['value'];
+                }
             }
         }
 
