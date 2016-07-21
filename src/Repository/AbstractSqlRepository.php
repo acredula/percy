@@ -228,9 +228,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $entity = new $entity;
 
         foreach (explode(',', $name) as $field) {
-            if (! array_key_exists($name, $entity->getMapping())) {
+            if (! array_key_exists($field, $entity->getMapping())) {
                 throw new InvalidArgumentException(
-                    sprintf('(%s) is not a whitelisted field to filter, search or sort by', $name)
+                    sprintf('(%s) is not a whitelisted field to filter, search or sort by', $field)
                 );
             }
         }
