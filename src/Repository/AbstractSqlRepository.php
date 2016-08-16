@@ -270,6 +270,15 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field,
             $field
         );
+        
+        if (is_array($value)) {
+            $query .= sprintf(
+                ' ORDER BY FIND_IN_SET(%s.%s, ' . $this->dbal->quote(implode(',', $value)) . ')',
+                $this->getTable(),
+                $field
+            );
+        }
+
 
         // @todo - allow extra filtering from request
 
