@@ -181,4 +181,31 @@ class SqlStore extends AbstractStore
 
         $this->dbal->commit();
     }
+    
+    /**
+     * Remove relationship.
+     *
+     * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $rels
+     * @param array                         $map
+     *
+     * @return void
+     */
+    public function deleteRelationship(EntityInterface $entity, array $rels, array $map)
+    {
+        $this->dbal->beginTransaction();
+
+        foreach ($rels as $rel) {
+            $delete = $this->query->newDelete();
+            $delete->from($map['defined_in']['table']);
+            $delete->where(sprintf('%s = :%s', $map['defined_in']['primary'], $map['defined_in']['entity']));
+            $delete->where(sprintf('%s = :%s', $map['target']['relationship'], 'relationship'));
+            $delete->bindValue('uuid', $entity[$map['defined_in']['entity']]);
+            $delete->bindValue('relationship', $rel);
+
+            $this->dbal->perform($delete->getStatement(), $delete->getBindValues());
+        }
+
+        $this->dbal->commit();
+    }
 }
