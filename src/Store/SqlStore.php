@@ -200,6 +200,7 @@ class SqlStore extends AbstractStore
             $delete->from($map['defined_in']['table']);
             $delete->where(sprintf('%s = :%s', $map['defined_in']['primary'], $map['defined_in']['entity']));
             $delete->where(sprintf('%s = :%s', $map['target']['relationship'], 'relationship'));
+            $delete->limit(1);
             $delete->bindValue('uuid', $entity[$map['defined_in']['entity']]);
             $delete->bindValue('relationship', $rel);
 
