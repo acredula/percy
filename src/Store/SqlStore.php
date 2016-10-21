@@ -5,6 +5,7 @@ namespace Percy\Store;
 use Aura\Filter\FilterFactory;
 use Aura\SqlQuery\QueryFactory;
 use Aura\Sql\ExtendedPdo;
+use PDO;
 use PDOException;
 use Percy\Entity\Collection;
 use Percy\Entity\EntityInterface;
@@ -30,7 +31,7 @@ class SqlStore extends AbstractStore
     public function __construct(ExtendedPdo $dbal, FilterFactory $filter)
     {
         $this->dbal  = $dbal;
-        $this->query = new QueryFactory('mysql');
+        $this->query = new QueryFactory($dbal->getAttribute(PDO::ATTR_DRIVER_NAME));
         parent::__construct($filter);
     }
 
