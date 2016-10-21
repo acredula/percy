@@ -21,7 +21,7 @@ trait CollectionBuilderTrait
             $entity = new $entity;
 
             $collection->addEntity(
-                (new $entity)->hydrate($row)
+                $entity->hydrate($row)
             );
         }
 
