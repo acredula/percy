@@ -61,9 +61,9 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function getByRequestAssertions($queryString, $dataQuery, $countQuery, array $binds)
     {
-        $uri     = $this->getMock(UriInterface::class);
-        $request = $this->getMock(ServerRequestInterface::class);
-        $dbal    = $this->getMock(ExtendedPdoInterface::class);
+        $uri     = $this->createMock(UriInterface::class);
+        $request = $this->createMock(ServerRequestInterface::class);
+        $dbal    = $this->createMock(ExtendedPdoInterface::class);
 
         $uri->expects($this->exactly(2))->method('getQuery')->will($this->returnValue($queryString));
 
@@ -85,7 +85,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection()
     {
-        $dbal = $this->getMock(ExtendedPdoInterface::class);
+        $dbal = $this->createMock(ExtendedPdoInterface::class);
 
         $dbal->expects($this->at(0))->method('fetchAll')->with(
             $this->equalTo('SELECT * FROM some_table WHERE some_table.field IN (:field)'),
@@ -130,9 +130,9 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         foreach ($queries as $query) {
             try {
-                $uri     = $this->getMock(UriInterface::class);
-                $request = $this->getMock(ServerRequestInterface::class);
-                $dbal    = $this->getMock(ExtendedPdoInterface::class);
+                $uri     = $this->createMock(UriInterface::class);
+                $request = $this->createMock(ServerRequestInterface::class);
+                $dbal    = $this->createMock(ExtendedPdoInterface::class);
 
                 $uri->expects($this->once())->method('getQuery')->will($this->returnValue($query));
                 $request->expects($this->once())->method('getUri')->will($this->returnValue($uri));
@@ -157,8 +157,8 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testAttachRelationshipsIsSkippedWhenNoIncludesRequested()
     {
-        $collection = $this->getMock(Collection::class);
-        $dbal       = $this->getMock(ExtendedPdoInterface::class);
+        $collection = $this->createMock(Collection::class);
+        $dbal       = $this->createMock(ExtendedPdoInterface::class);
         $repository = new SqlRepositoryStub($dbal);
 
         $this->assertNull($repository->attachRelationships($collection));

@@ -12,7 +12,7 @@ class NowTimestampDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDecoratorCreatesUuid()
     {
-        $entity = $this->getMock(EntityInterface::class);
+        $entity = $this->createMock(EntityInterface::class);
 
         $entity->expects($this->once())->method('offsetSet')->with($this->equalTo('timestamp'), $this->callback(function ($subject) {
             return ($subject <= PHP_INT_MAX && $subject >= ~PHP_INT_MAX);

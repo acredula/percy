@@ -137,7 +137,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
      */
     public function testEntityCanAddRelationship()
     {
-        $collection = $this->getMock(Collection::class);
+        $collection = $this->createMock(Collection::class);
 
         $entity = new EntityStub;
 

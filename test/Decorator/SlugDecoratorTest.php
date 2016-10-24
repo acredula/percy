@@ -12,7 +12,7 @@ class SlugDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDecoratorCreatesSlug()
     {
-        $entity = $this->getMock(EntityInterface::class);
+        $entity = $this->createMock(EntityInterface::class);
 
         $entity->expects($this->at(0))->method('offsetGet')->with($this->equalTo('forename'))->will($this->returnValue('Phil Ronald'));
         $entity->expects($this->at(1))->method('offsetGet')->with($this->equalTo('surname'))->will($this->returnValue('Bennett'));

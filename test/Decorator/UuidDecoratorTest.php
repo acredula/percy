@@ -12,7 +12,7 @@ class UuidDecoratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testDecoratorCreatesUuid()
     {
-        $entity = $this->getMock(EntityInterface::class);
+        $entity = $this->createMock(EntityInterface::class);
 
         $entity->expects($this->once())->method('offsetSet')->with($this->equalTo('uuid'), $this->callback(function ($subject) {
             return (bool) preg_match('/^\{?[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\}?$/i', $subject);
