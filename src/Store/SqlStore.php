@@ -168,6 +168,19 @@ class SqlStore extends AbstractStore
         $this->dbal->beginTransaction();
 
         foreach ($rels as $rel) {
+            $exists = $this->dbal->fetchOne(sprintf(
+                "select * from %s where %s = '%s' and %s = '%s'",
+                $map['defined_in']['table'],
+                $map['defined_in']['primary'],
+                $entity[$map['defined_in']['entity']],
+                $map['target']['relationship'],
+                $rel
+            ));
+
+            if ($exists !== false) {
+                continue;
+            }
+
             $data = [
                 $map['defined_in']['primary']  => $entity[$map['defined_in']['entity']],
                 $map['target']['relationship'] => $rel
@@ -182,7 +195,7 @@ class SqlStore extends AbstractStore
 
         $this->dbal->commit();
     }
-    
+
     /**
      * Remove relationship.
      *
