@@ -123,6 +123,20 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Asserts that the sanitiser maps has.
+     */
+    public function testSanitiserMapsHas()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('has=something,somethingelse');
+
+        $this->assertEquals([
+            'has' => ['something', 'somethingelse']
+        ], $query);
+    }
+
+    /**
      * Asserts that the sanitiser maps in filters.
      */
     public function testSanitiserMapsInFilters()
