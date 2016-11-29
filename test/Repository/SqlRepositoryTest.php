@@ -26,6 +26,12 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
             'binds'        => ['some_field_0' => 'value1', 'another_field_1' => 'value2']
         ],
         [
+            'query_string' => 'sort=some_table.some_field|desc&filter[]=some_field|=|null&filter[]=another_field|!=|null&limit=50&offset=0',
+            'data_query'   => 'SELECT * FROM some_table WHERE some_field IS null AND another_field IS NOT null ORDER BY some_table.some_field DESC LIMIT 0,50',
+            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE some_field IS null AND another_field IS NOT null',
+            'binds'        => ['some_field_0' => 'null', 'another_field_1' => 'null']
+        ],
+        [
             'query_string' => 'search=some_field|term&minscore=1.0',
             'data_query'   => 'SELECT * FROM some_table WHERE MATCH (some_field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (some_field) AGAINST (:match_bind) > :score_bind ORDER BY MATCH (some_field) AGAINST (:match_bind) > :score_bind',
             'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE MATCH (some_field) AGAINST (:match_bind IN BOOLEAN MODE) HAVING MATCH (some_field) AGAINST (:match_bind) > :score_bind',
@@ -34,6 +40,12 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         [
             'query_string' => 'sort=rand',
             'data_query'   => 'SELECT * FROM some_table ORDER BY RAND()',
+            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table',
+            'binds'        => []
+        ],
+        [
+            'query_string' => '',
+            'data_query'   => 'SELECT * FROM some_table',
             'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table',
             'binds'        => []
         ]
