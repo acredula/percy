@@ -270,15 +270,29 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $field,
             $field
         );
-        
-        if (is_array($value)) {
-            $query .= sprintf(
-                ' ORDER BY FIND_IN_SET(%s.%s, ' . $this->dbal->quote(implode(',', $value)) . ')',
-                $this->getTable(),
-                $field
-            );
+
+        $sort = false;
+
+        if ($request instanceof ServerRequestInterface) {
+            $params = $request->getQueryParams();
+            $sort   = (array_key_exists('sort', $params)) ? $params['sort'] : false;
         }
 
+        if (is_array($value)) {
+            if ($sort !== false) {
+                $query .= sprintf(
+                    ' ORDER BY FIND_IN_SET(%s.%s, ' . $this->dbal->quote(implode(',', $value)) . ')',
+                    $this->getTable(),
+                    $field
+                );
+            } else {
+                $entity    = $this->getEntityType();
+                $entity    = new $entity;
+                $mapping   = $entity->getMapping();
+                $whitelist = array_keys($mapping);
+                $query    .= $this->buildSortPart($sort, $this->getTable(), $whitelist);
+            }
+        }
 
         // @todo - allow extra filtering from request
 
