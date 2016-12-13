@@ -177,7 +177,7 @@ trait QueryStringParserTrait
     /**
      * Map includes in to useable array.
      *
-     * @param array $filters
+     * @param array $includes
      *
      * @return array
      */
@@ -209,7 +209,6 @@ trait QueryStringParserTrait
                     break;
                     default:
                         throw new InvalidArgumentException('Include formatted incorrectly.');
-                    break;
                 }
             }
         }
