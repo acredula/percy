@@ -328,6 +328,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                : [];
 
         foreach ($this->getRelationshipMap() as $key => $map) {
+            if (! array_key_exists('include', $rules)) {
+                continue;
+            }
+
             if (array_key_exists('include', $rules) && ! array_key_exists($key, $rules['include'])) {
                 continue;
             }
