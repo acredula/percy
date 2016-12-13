@@ -7,6 +7,11 @@ use InvalidArgumentException;
 trait QueryStringParserTrait
 {
     /**
+     * @var integer
+     */
+    protected $param = 0;
+
+    /**
      * Parse HTTP query string and return array representation
      * to be attached to a database query.
      *
@@ -54,6 +59,8 @@ trait QueryStringParserTrait
                 return $this->parseFilters((array) $value);
             case 'has':
                 return explode(',', $value);
+            case 'include':
+                return $this->parseInclude(explode(',', $value));
             case 'search':
                 return $this->parseSearch($value);
             case 'minscore':
@@ -125,30 +132,86 @@ trait QueryStringParserTrait
     protected function parseFilters(array $filters)
     {
         $mapped = [];
-        $param  = 0;
+
+        $this->param = 0;
 
         foreach ($filters as $filter) {
-            $filter = explode('|', $filter);
+            $mapped[] = $this->parseFilter($filter);
+        }
 
-            if (count($filter) !== 3) {
-                throw new InvalidArgumentException(
-                    'Malformed query string, filter format should be (filter[]=field|delimiter|value)'
-                );
+        return $mapped;
+    }
+
+    /**
+     * Parse an individual filter.
+     *
+     * @param string $filter
+     *
+     * @return array
+     */
+    protected function parseFilter($filter)
+    {
+        $filter = explode('|', $filter);
+
+        if (count($filter) !== 3) {
+            throw new InvalidArgumentException(
+                'Malformed query string, filter format should be (filter[]=field|delimiter|value)'
+            );
+        }
+
+        $filter = array_combine(['field', 'delimiter', 'value'], $filter);
+
+        $filter['binding']   = str_replace('.', '_', $filter['field']) . '_' . $this->param++;
+        $filter['delimiter'] = strtolower($filter['delimiter']);
+        $filter['delimiter'] = html_entity_decode($filter['delimiter']);
+
+        if (! in_array($filter['delimiter'], [
+            '=', '!=', '<>', '<=', '>=', '<', '>', 'in', 'not in', 'like', 'not like'
+        ])) {
+            throw new InvalidArgumentException(sprintf('(%s) is not an accepted delimiter', $filter['delimiter']));
+        }
+
+        return $filter;
+    }
+
+    /**
+     * Map includes in to useable array.
+     *
+     * @param array $filters
+     *
+     * @return array
+     */
+    protected function parseInclude(array $includes)
+    {
+        $mapped = [];
+
+        foreach ($includes as $include) {
+            $parts = explode(';', $include);
+            $key   = array_shift($parts);
+
+            if (empty($parts)) {
+                $mapped[$key] = [];
+                continue;
             }
 
-            $filter = array_combine(['field', 'delimiter', 'value'], $filter);
+            $mapped[$key]['filter'] = [];
+            $mapped[$key]['limit']  = null;
 
-            $filter['binding']   = str_replace('.', '_', $filter['field']) . '_' . $param++;
-            $filter['delimiter'] = strtolower($filter['delimiter']);
-            $filter['delimiter'] = html_entity_decode($filter['delimiter']);
+            foreach ($parts as $part) {
+                $split = explode('|', $part);
 
-            if (! in_array($filter['delimiter'], [
-                '=', '!=', '<>', '<=', '>=', '<', '>', 'in', 'not in', 'like', 'not like'
-            ])) {
-                throw new InvalidArgumentException(sprintf('(%s) is not an accepted delimiter', $filter['delimiter']));
+                switch (count($split)) {
+                    case 2:
+                        $mapped[$key]['limit'] = $split[1];
+                    break;
+                    case 3:
+                        $mapped[$key]['filter'][] = $this->parseFilter($part);
+                    break;
+                    default:
+                        throw new InvalidArgumentException('Include formatted incorrectly.');
+                    break;
+                }
             }
-
-            $mapped[] = $filter;
         }
 
         return $mapped;
