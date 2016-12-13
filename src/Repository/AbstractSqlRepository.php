@@ -350,7 +350,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $map['defined_in']['primary']
             );
 
-            $options = $rules['include'][$key];
+            $options = (array_key_exists('include', $rules)) ? $rules['include'][$key] : [];
 
             if (! empty($options['filter'])) {
                 foreach ($options['filter'] as $filter) {
