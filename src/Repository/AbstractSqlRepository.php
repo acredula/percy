@@ -315,13 +315,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $include                        = null,
         ServerRequestInterface $request = null
     ) {
-        if (count($collection) === 0) {
+        if (count($collection) === 0 || is_null($include)) {
             return;
         }
 
-        if (is_null($include)) {
-            return;
-        }
+        $bind = [];
 
         $rels = $collection->getIterator()->current()->getRelationshipMap();
 
@@ -330,7 +328,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                : [];
 
         foreach ($this->getRelationshipMap() as $key => $map) {
-            if (is_array($include) && ! in_array($key, $include)) {
+            if (array_key_exists('include', $rules) && ! array_key_exists($key, $rules['include'])) {
                 continue;
             }
 
@@ -352,7 +350,21 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $map['defined_in']['primary']
             );
 
-            // @todo allow for further filtering of rels via request
+            $options = $rules['include'][$key];
+
+            if (! empty($options['filter'])) {
+                foreach ($options['filter'] as $filter) {
+                    $query .= sprintf(
+                        ' AND %s.%s %s :%s',
+                        $map['target']['table'],
+                        $filter['field'],
+                        $filter['delimiter'],
+                        $filter['binding']
+                    );
+
+                    $bind[$filter['binding']] = $filter['value'];
+                }
+            }
 
             if (array_key_exists('sort', $rules)) {
                 $whitelist = [];
@@ -367,7 +379,13 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
             }
 
-            $result = $this->dbal->fetchAll($query, ['relationships' => $binds]);
+            if (array_key_exists('limit', $options) && ! is_null($options['limit'])) {
+                $query .= ' LIMIT ' . (int) $options['limit'];
+            }
+
+            $bind['relationships'] = $binds;
+
+            $result = $this->dbal->fetchAll($query, $bind);
 
             $this->attachRelationshipsToCollection($collection, $key, $result);
         }
