@@ -328,11 +328,10 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                : [];
 
         foreach ($this->getRelationshipMap() as $key => $map) {
-            if (! array_key_exists('include', $rules)) {
-                continue;
-            }
-
-            if (array_key_exists('include', $rules) && ! array_key_exists($key, $rules['include'])) {
+            if (
+                ! array_key_exists('include', $rules) ||
+                (array_key_exists('include', $rules) && ! array_key_exists($key, $rules['include']))
+            ) {
                 continue;
             }
 
@@ -357,15 +356,9 @@ abstract class AbstractSqlRepository implements RepositoryInterface
             $options = (array_key_exists('include', $rules)) ? $rules['include'][$key] : [];
 
             if (! empty($options['filter'])) {
-                foreach ($options['filter'] as $filter) {
-                    $query .= sprintf(
-                        ' AND %s.%s %s :%s',
-                        $map['target']['table'],
-                        $filter['field'],
-                        $filter['delimiter'],
-                        $filter['binding']
-                    );
+                $query .= $this->buildRelationshipFilterQueryPart($map, $options['filter']);
 
+                foreach ($options['filter'] as $filter) {
                     $bind[$filter['binding']] = $filter['value'];
                 }
             }
@@ -375,9 +368,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
                 if (array_key_exists($key, $rels)) {
                     $entity    = $rels[$key];
-                    $entity    = new $entity;
-                    $mapping   = $entity->getMapping();
-                    $whitelist = array_keys($mapping);
+                    $whitelist = array_keys((new $entity)->getMapping());
                 }
 
                 $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
@@ -393,6 +384,31 @@ abstract class AbstractSqlRepository implements RepositoryInterface
 
             $this->attachRelationshipsToCollection($collection, $key, $result);
         }
+    }
+
+    /**
+     * Build conditionals part of query to filter relationships.
+     *
+     * @param array $map
+     * @param array $filters
+     *
+     * @return string
+     */
+    protected function buildRelationshipFilterQueryPart($map, $filters)
+    {
+        $query = '';
+
+        foreach ($filters as $filter) {
+            $query .= sprintf(
+                ' AND %s.%s %s :%s',
+                $map['target']['table'],
+                $filter['field'],
+                $filter['delimiter'],
+                $filter['binding']
+            );
+        }
+
+        return $query;
     }
 
     /**
