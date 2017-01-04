@@ -315,7 +315,7 @@ abstract class AbstractSqlRepository implements RepositoryInterface
         $include                        = null,
         ServerRequestInterface $request = null
     ) {
-        if (count($collection) === 0 || is_null($include)) {
+        if (count($collection) === 0) {
             return;
         }
 
@@ -374,8 +374,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
             }
 
-            if (array_key_exists('limit', $options) && ! is_null($options['limit'])) {
-                $query .= ' LIMIT ' . (int) $options['limit'];
+            if (array_key_exists('limit', $rules) && ! is_null($rules['limit'])) {
+                $query .= ' LIMIT ' . (int) $rules['limit'];
             }
 
             $bind['relationships'] = $binds;
