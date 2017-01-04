@@ -221,6 +221,44 @@ class QueryStringParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Asserts that the sanitiser maps includes.
+     */
+    public function testSanitiserMapsInclude()
+    {
+        $sanitiser = new QueryStringParserTraitStub;
+
+        $query = $sanitiser->parseQueryString('include=something,somethingelse;blah|=|blah;limit|5');
+
+        $this->assertEquals([
+            'include' => [
+                'something' => [],
+                'somethingelse' => [
+                    'filter' => [
+                        [
+                            'field'     => 'blah',
+                            'delimiter' => '=',
+                            'value'     => 'blah',
+                            'binding'   => 'blah_0'
+                        ]
+                    ],
+                    'limit' => 5
+                ]
+            ]
+        ], $query);
+    }
+
+    /**
+     * Asserts that the sanitiser throws an exception when formatted incorrectly.
+     */
+    public function testSanitiserThrowsExceptionWhenFormattedIncorrectly()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+
+        $sanitiser = new QueryStringParserTraitStub;
+        $sanitiser->parseQueryString('include=something,somethingelse;blah|=|blah|huh;limit|5');
+    }
+
+    /**
      * Asserts that the sanitiser throws an exception when filter is malformed.
      */
     public function testMalformedFilterThrowsException()

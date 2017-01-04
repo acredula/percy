@@ -4,6 +4,7 @@ namespace Percy\Test\Entity;
 
 use Percy\Entity\Collection;
 use Percy\Test\Asset\EntityStub;
+use Percy\Test\Asset\EntityWithGeneralScopeStub;
 use Percy\Test\Asset\EmptyEntityStub;
 
 class EntityTest extends \PHPUnit_Framework_TestCase
@@ -145,5 +146,69 @@ class EntityTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayHasKey('test', $entity->getRelationships());
         $this->assertSame($collection, $entity->getRelationships()['test']);
+    }
+
+    /**
+     * Asserts that an exception is thrown when trying to read with no scope.
+     */
+    public function testExceptionIsThrownWhenIncorrectReadScope()
+    {
+        $this->setExpectedException('Percy\Exception\ScopeException');
+        $entity = new EntityWithGeneralScopeStub;
+
+        $entity->getData(['wrong_scope']);
+    }
+
+    /**
+     * Asserts that an exception is thrown when trying to write with no scope.
+     */
+    public function testExceptionIsThrownWhenIncorrectWriteScope()
+    {
+        $this->setExpectedException('Percy\Exception\ScopeException');
+        $entity = new EntityWithGeneralScopeStub;
+
+        $entity->getData(['read_scope'], true);
+    }
+
+    /**
+     * Asserts that fields are handled correctly with scopes.
+     */
+    public function testEntityHandlesFieldsCorrectlyWithScopes()
+    {
+        $entity = new EntityWithGeneralScopeStub;
+
+        $entity->hydrate([
+            'field1' => 'blah', 'field2' => 'blah', 'field3' => 'blah'
+        ]);
+
+        $this->assertSame([
+            'field1' => 'blah', 'field2' => 'blah'
+        ], $entity->getData(['read_scope', 'write_scope', 'test.read', 'test.write'], true));
+
+        $this->assertSame([
+            'field1' => 'blah'
+        ], $entity->getData(['read_scope', 'write_scope', 'test.read'], true));
+
+        $this->assertSame([
+            'field2' => 'blah', 'field3' => 'blah',
+        ], $entity->getData(['read_scope']));
+    }
+
+    /**
+     * Asserts that a relationship is skipped when it fails scope check.
+     */
+    public function testRelationshipIsSkippedWhenFailsScopeCheck()
+    {
+        $collection = new Collection;
+
+        $mock = $this->createMock('Percy\Entity\AbstractEntity');
+        $mock->expects($this->once())->method('toArray')->will($this->throwException(new \Percy\Exception\ScopeException));
+
+        $collection->addEntity($mock);
+
+        $entity = new EntityStub;
+        $entity->addRelationship('test', $collection);
+
+        $this->assertTrue(empty($entity->toArray()['_relationships']));
     }
 }

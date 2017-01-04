@@ -44,6 +44,12 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
             'binds'        => []
         ],
         [
+            'query_string' => 'has=some_relationship',
+            'data_query'   => 'SELECT * FROM some_table WHERE (SELECT COUNT(some_table.some_uuid) FROM some_table WHERE some_table.some_uuid = some_table.uuid) > 0',
+            'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table WHERE (SELECT COUNT(some_table.some_uuid) FROM some_table WHERE some_table.some_uuid = some_table.uuid) > 0',
+            'binds'        => []
+        ],
+        [
             'query_string' => '',
             'data_query'   => 'SELECT * FROM some_table',
             'count_query'  => 'SELECT *, COUNT(*) as total FROM some_table',
@@ -97,23 +103,63 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testSqlRepoBuildsQueryFromFieldAndReturnsCollection()
     {
-        $dbal = $this->createMock(ExtendedPdoInterface::class);
+        $dbal    = $this->createMock(ExtendedPdoInterface::class);
+        $request = $this->createMock(ServerRequestInterface::class);
+        $uri     = $this->createMock(UriInterface::class);
+
+        $dbal->expects($this->at(0))->method('quote')->with($this->equalTo('value1,value2'))->will($this->returnValue("'value1,value2'"));
+
+        $dbal->expects($this->at(1))->method('fetchAll')->with(
+            $this->equalTo("SELECT * FROM some_table WHERE some_table.field IN (:field) ORDER BY FIND_IN_SET(some_table.field, 'value1,value2')"),
+            $this->equalTo(['field' => ['value1', 'value2']])
+        )->will(
+            $this->returnValue([[], []])
+        );
+
+        $dbal->expects($this->at(2))->method('fetchOne')->with(
+            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE some_table.field IN (:field)'),
+            $this->equalTo(['field' => ['value1', 'value2']])
+        )->will(
+            $this->returnValue(['total' => 10])
+        );
+
+        $uri->expects($this->once())->method('getQuery')->will($this->returnValue(''));
+        $request->expects($this->once())->method('getUri')->will($this->returnValue($uri));
+
+        $collection = (new SqlRepositoryStub($dbal))->getByField('field', ['value1', 'value2'], $request);
+
+        $this->assertInstanceOf(Collection::class, $collection);
+        $this->assertCount(2, $collection);
+        $this->assertSame(10, $collection->getTotal());
+    }
+
+    /**
+     * Asserts that the repository can build and execute a query by field with sort.
+     */
+    public function testSqlRepoBuildsQueryFromFieldWithSortAndReturnsCollection()
+    {
+        $dbal    = $this->createMock(ExtendedPdoInterface::class);
+        $request = $this->createMock(ServerRequestInterface::class);
+        $uri     = $this->createMock(UriInterface::class);
 
         $dbal->expects($this->at(0))->method('fetchAll')->with(
-            $this->equalTo('SELECT * FROM some_table WHERE some_table.field IN (:field)'),
-            $this->equalTo(['field' => 'value1,value2'])
+            $this->equalTo("SELECT * FROM some_table WHERE some_table.some_field IN (:some_field) ORDER BY some_table.some_field ASC"),
+            $this->equalTo(['some_field' => ['value1', 'value2']])
         )->will(
             $this->returnValue([[], []])
         );
 
         $dbal->expects($this->at(1))->method('fetchOne')->with(
-            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE some_table.field IN (:field)'),
-            $this->equalTo(['field' => 'value1,value2'])
+            $this->equalTo('SELECT COUNT(*) as total FROM some_table WHERE some_table.some_field IN (:some_field)'),
+            $this->equalTo(['some_field' => ['value1', 'value2']])
         )->will(
             $this->returnValue(['total' => 10])
         );
 
-        $collection = (new SqlRepositoryStub($dbal))->getByField('field', 'value1,value2');
+        $uri->expects($this->once())->method('getQuery')->will($this->returnValue('sort=some_table.some_field|asc'));
+        $request->expects($this->once())->method('getUri')->will($this->returnValue($uri));
+
+        $collection = (new SqlRepositoryStub($dbal))->getByField('some_field', ['value1', 'value2'], $request);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertCount(2, $collection);

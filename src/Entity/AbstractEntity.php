@@ -82,7 +82,7 @@ abstract class AbstractEntity implements EntityInterface
 
         if (! is_null($this->getWriteScope()) && ! in_array($this->getWriteScope(), $scopes) && $toPersist === true) {
             throw new ScopeException(sprintf(
-                '(%s) scope needed to write (%s) resource', $this->getReadScope(), get_called_class()
+                '(%s) scope needed to write (%s) resource', $this->getWriteScope(), get_called_class()
             ));
         }
 
