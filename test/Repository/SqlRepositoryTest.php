@@ -235,7 +235,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
 
         $entity['uuid'] = 'blah';
 
-        $uri->expects($this->once())->method('getQuery')->will($this->returnValue('include=some_relationship;uuid|=|blah,another&sort=some_table.uuid|asc,another_table.uuid|asc&limit=1'));
+        $uri->expects($this->once())->method('getQuery')->will($this->returnValue('include=some_relationship;uuid|=|blah,another&sort=some_table.uuid|asc,another_table.uuid|asc'));
         $request->expects($this->once())->method('getUri')->will($this->returnValue($uri));
 
         $collection->expects($this->at(0))->method('count')->will($this->returnValue(1));
@@ -245,7 +245,7 @@ class SqlRepositoryTest extends \PHPUnit_Framework_TestCase
         $collection->expects($this->at(4))->method('getIterator')->will($this->returnValue([$entity]));
 
         $dbal->expects($this->once())->method('fetchAll')->with(
-            $this->equalTo("SELECT * FROM some_table LEFT JOIN another_table ON another_table.uuid = some_table.another_uuid WHERE some_table.some_uuid IN (:relationships) AND another_table.uuid = :uuid_0 ORDER BY another_table.uuid ASC LIMIT 1"),
+            $this->equalTo("SELECT * FROM some_table LEFT JOIN another_table ON another_table.uuid = some_table.another_uuid WHERE some_table.some_uuid IN (:relationships) AND another_table.uuid = :uuid_0 ORDER BY another_table.uuid ASC"),
             $this->equalTo(['relationships' => ['blah'], 'uuid_0' => 'blah'])
         )->will(
             $this->returnValue([])

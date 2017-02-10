@@ -328,10 +328,11 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                : [];
 
         foreach ($this->getRelationshipMap() as $key => $map) {
-            if (
-                ! array_key_exists('include', $rules) ||
-                (array_key_exists('include', $rules) && ! array_key_exists($key, $rules['include']))
-            ) {
+            if (! array_key_exists('include', $rules) && ! in_array($key, $include)) {
+                continue;
+            }
+
+            if (! array_key_exists($key, $rules['include']) && ! in_array($key, $include)) {
                 continue;
             }
 
@@ -374,8 +375,8 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                 $query .= $this->buildSortPart($rules['sort'], $map['target']['table'], $whitelist);
             }
 
-            if (array_key_exists('limit', $rules) && ! is_null($rules['limit'])) {
-                $query .= ' LIMIT ' . (int) $rules['limit'];
+            if (array_key_exists('limit', $options) && ! is_null($options['limit'])) {
+                $query .= ' LIMIT ' . (int) $options['limit'];
             }
 
             $bind['relationships'] = $binds;
