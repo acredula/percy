@@ -327,12 +327,24 @@ abstract class AbstractSqlRepository implements RepositoryInterface
                ? $this->parseQueryString($request->getUri()->getQuery())
                : [];
 
+        if (is_string($include)) {
+            $include = explode(',', $include);
+        }
+
+        if (! array_key_exists('include', $rules) && is_array($include)) {
+            $rules['include'] = [];
+
+            foreach ($include as $key) {
+                $rules['include'][$key] = [];
+            }
+        }
+
         foreach ($this->getRelationshipMap() as $key => $map) {
-            if (! array_key_exists('include', $rules) && ! in_array($key, $include)) {
+            if (! array_key_exists('include', $rules)) {
                 continue;
             }
 
-            if (! array_key_exists($key, $rules['include']) && ! in_array($key, $include)) {
+            if (! array_key_exists($key, $rules['include'])) {
                 continue;
             }
 
