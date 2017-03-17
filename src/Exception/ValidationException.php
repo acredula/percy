@@ -9,7 +9,7 @@ class ValidationException extends DomainException
     /**
      * Set failures.
      *
-     * @param array
+     * @param array $failures
      */
     public function setFailures($failures)
     {
