@@ -55,7 +55,10 @@ abstract class AbstractStore implements StoreInterface
 
                 $filter($data);
             } catch (FilterFailed $e) {
-                throw new ValidationException($e->getMessage());
+                $exception = new ValidationException($e->getMessage());
+                $exception->setFailures($e->getFailures()->getMessages());
+
+                throw $exception;
             }
         }
 
