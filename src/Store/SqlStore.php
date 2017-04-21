@@ -223,4 +223,36 @@ class SqlStore extends AbstractStore
 
         $this->dbal->commit();
     }
+
+    /**
+     * Update a relationship.
+     *
+     * @param \Percy\Entity\EntityInterface $entity
+     * @param array                         $rels
+     * @param array                         $map
+     *
+     * @return void
+     */
+    public function updateRelationship(EntityInterface $entity, array $rels, array $map)
+    {
+        $this->dbal->beginTransaction();
+
+        foreach ($rels as $rel) {
+            foreach ($rel as $key => $value) {
+                $update = $this->query->newUpdate();
+                $update->table($map['defined_in']['table']);
+                $update->cols([$map['target']['relationship'] => $value]);
+                $update->where(sprintf('%s = :%s', $map['defined_in']['primary'], $map['defined_in']['entity']));
+                $update->where(sprintf('%s = :%s', $map['target']['relationship'], 'relationship'));
+                $update->limit(1);
+                $update->bindValue('uuid', $entity[$map['defined_in']['entity']]);
+                $update->bindValue('relationship', $key);
+                $update->bindValue($map['target']['relationship'], $value);
+
+                $this->dbal->perform($update->getStatement(), $update->getBindValues());
+            }
+        }
+
+        $this->dbal->commit();
+    }
 }
