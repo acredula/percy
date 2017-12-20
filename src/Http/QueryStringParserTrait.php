@@ -29,7 +29,7 @@ trait QueryStringParserTrait
 
         $query = [];
 
-        while (list($key, $value) = each($split)) {
+        foreach ($split as $key => $value) {
             $mapped = call_user_func_array([$this, 'filterQueryParams'], [$key, $value]);
             if ($mapped !== false) {
                 $query[$key] = $mapped;
