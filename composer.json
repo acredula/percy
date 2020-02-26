@@ -1,8 +1,8 @@
 {
-    "name": "acredula/percy",
+    "name": "hmsweb/percy",
     "description": "Repository, Storage and DataMapper abstraction to aid in the building of Web Applications and RESTful APIs.",
     "keywords": [
-        "acredula",
+        "hmsweb",
         "data",
         "mapper",
         "respository",
@@ -10,7 +10,7 @@
         "storage",
         "entity"
     ],
-    "homepage": "https://github.com/acredula/percy",
+    "homepage": "https://github.com/hmsweb/percy",
     "license": "MIT",
     "authors": [
         {
